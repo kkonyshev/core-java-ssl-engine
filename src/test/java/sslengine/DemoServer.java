@@ -3,10 +3,8 @@ package sslengine;
 import javax.net.ssl.SSLContext;
 import java.security.SecureRandom;
 
-/**
- * Created by ka on 16/01/16.
- */
 public class DemoServer {
+
     public static void main(String[] argv) {
         try {
             SSLContext context = SSLContext.getInstance("TLSv1.2");
@@ -22,4 +20,5 @@ public class DemoServer {
             e.printStackTrace();
         }
     }
+
 }

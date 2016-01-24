@@ -99,8 +99,6 @@ public class NioSslServerThreaded extends NioSslPeer {
             Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
             while (selectedKeys.hasNext()) {
                 SelectionKey key = selectedKeys.next();
-                NDC.push(key.toString());
-
                 log.debug("removing key: " + key);
                 selectedKeys.remove();
 
@@ -117,7 +115,7 @@ public class NioSslServerThreaded extends NioSslPeer {
                     log.debug("accepting");
                     accept(key);
                 } else if (key.isReadable()) {
-                    log.debug("submitting");
+                    log.debug("processing new socket channel: " + key);
                     locks.put(key, new Object());
                     acceptorService.submit(
                             new SocketProcessor(
@@ -125,8 +123,14 @@ public class NioSslServerThreaded extends NioSslPeer {
                                     (SSLEngine) key.attachment(),
                                     new EventHandler() {
                                         @Override
-                                        void handle() {
-                                            log.debug("handling success: " + key);
+                                        void onSuccessHandler() {
+                                            log.debug("removing lock from key: " + key);
+                                            locks.remove(key);
+                                        }
+
+                                        @Override
+                                        void onErrorHandler(Exception e) {
+                                            log.error(e.getMessage(), e);
                                             locks.remove(key);
                                         }
                                     }));
@@ -171,6 +175,7 @@ public class NioSslServerThreaded extends NioSslPeer {
             socketChannel.register(selector, SelectionKey.OP_READ, engine);
         } else {
             socketChannel.close();
+            locks.remove(key);
             log.debug("Connection closed due to handshake failure.");
         }
     }

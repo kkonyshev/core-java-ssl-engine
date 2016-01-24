@@ -1,7 +1,7 @@
 package sslengine;
 
 import javax.net.ssl.*;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -16,7 +16,6 @@ import java.util.Arrays;
  * When the connection between the client and the object is established, {@link NioSslClientThreadLocal} provides
  * a public write and read method, in order to communicate with its peer. 
  *
- * @author <a href="mailto:travelling.with.code@gmail.com">Alex</a>
  */
 public class NioSslClientThreadLocal extends NioSslPeer {
 
@@ -58,9 +57,9 @@ public class NioSslClientThreadLocal extends NioSslPeer {
         engine.setUseClientMode(true);
 
         SSLSession session = engine.getSession();
-        myAppData = ByteBuffer.allocate(1024);
+        myAppData = ByteBuffer.allocate(1024000);
         myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
-        peerAppData = ByteBuffer.allocate(1024);
+        peerAppData = ByteBuffer.allocate(1024000);
         peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     }
 
@@ -120,7 +119,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                 while (myNetData.hasRemaining()) {
                     socketChannel.write(myNetData);
                 }
-                log.debug("Message sent to the server: " + new String(data));
+                log.debug("Message sent to the server, size: " + data.length);
                 break;
             case BUFFER_OVERFLOW:
                 myNetData = enlargePacketBuffer(engine, myNetData);
@@ -132,6 +131,55 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                 return;
             default:
                 throw new IllegalStateException("Invalid SSL status: " + result.getStatus());
+            }
+        }
+
+    }
+
+    public void writeStream(InputStream ios) throws IOException {
+        writeFromBuffer(socketChannel, engine, ios);
+    }
+
+    protected void writeFromBuffer(SocketChannel socketChannel, SSLEngine engine, InputStream ios) throws IOException {
+
+        log.debug("About to write to the server...");
+
+        byte[] buffer = new byte[1024];
+        int read = 0;
+        int totalRead = 0;
+
+        //myAppData.clear();
+        //myAppData.put(buffer);
+        //myAppData.flip();
+        while ((read = ios.read(buffer)) != -1) {
+            // The loop has a meaning for (outgoing) messages larger than 16KB.
+            // Every wrap call will remove 16KB from the original message and send it to the remote peer.
+            myAppData.clear();
+            myAppData.put(buffer);
+            myAppData.flip();
+            totalRead = totalRead + read;
+            log.debug("total bytes read: " + totalRead);
+
+            myNetData.clear();
+            SSLEngineResult result = engine.wrap(myAppData, myNetData);
+            switch (result.getStatus()) {
+                case OK:
+                    myNetData.flip();
+                    while (myNetData.hasRemaining()) {
+                        socketChannel.write(myNetData);
+                    }
+                    //log.debug("Message sent to the server: " + new String(buffer));
+                    break;
+                case BUFFER_OVERFLOW:
+                    myNetData = enlargePacketBuffer(engine, myNetData);
+                    break;
+                case BUFFER_UNDERFLOW:
+                    throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
+                case CLOSED:
+                    closeConnection(socketChannel, engine);
+                    return;
+                default:
+                    throw new IllegalStateException("Invalid SSL status: " + result.getStatus());
             }
         }
 

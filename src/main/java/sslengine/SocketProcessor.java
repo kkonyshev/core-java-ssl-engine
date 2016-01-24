@@ -3,11 +3,8 @@ package sslengine;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.*;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
@@ -23,7 +20,11 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
     private SSLEngine sslEngine;
     private EventHandler handler;
 
-    public SocketProcessor(SocketChannel socketChannel, SSLEngine sslEngine, EventHandler handler) {
+    private BufferedOutputStream outStream;
+
+    private byte[] clientData;
+
+    public SocketProcessor(SocketChannel socketChannel, SSLEngine sslEngine, EventHandler handler) throws FileNotFoundException {
         this.socketChannel = socketChannel;
         this.sslEngine = sslEngine;
         this.handler = handler;
@@ -35,16 +36,25 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
         peerNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());
         dummySession.invalidate();
 
+        outStream = new BufferedOutputStream(new FileOutputStream("src/main/resources/huge1.out"));
     }
 
     @Override
     public void run() {
         try {
-            read(socketChannel, sslEngine);
-            handler.handle();
+            clientData = read(socketChannel, sslEngine);
+            log.debug("writing to buffer: " + new String(clientData));
+            outStream.write(clientData);
+            onSuccessHandle();
         } catch (Exception e) {
-            e.printStackTrace();
+            handler.onErrorHandler(e);
         }
+    }
+
+    protected void onSuccessHandle() throws IOException {
+        //echo
+        write(socketChannel, sslEngine, String.valueOf(clientData.length).getBytes());
+        handler.onSuccessHandler();
     }
 
     /**
@@ -237,7 +247,7 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
                         int arrayOffset = peerAppData.arrayOffset();
                         data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());
                         log.debug("Incoming message: " + new String(data));
-                        break;
+                        return data;
                     case BUFFER_OVERFLOW:
                         peerAppData = enlargeApplicationBuffer(engine, peerAppData);
                         break;
@@ -248,14 +258,17 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
                         log.debug("Client wants to close connection...");
                         closeConnection(socketChannel, engine);
                         log.debug("Goodbye client!");
+                        try {
+                            log.debug("closing buffer");
+                            outStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         return data;
                     default:
                         throw new IllegalStateException("Invalid SSL status: " + result.getStatus());
                 }
             }
-
-            //echo
-            write(socketChannel, engine, data);
 
         } else if (bytesRead < 0) {
             log.error("Received end of stream. Will try to close connection with client...");
