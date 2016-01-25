@@ -1,73 +1,31 @@
 package sslengine;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.BufferOverflowException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.security.KeyStore;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.apache.log4j.Logger;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
+import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.apache.log4j.Logger;
-
-/**
- * A class that represents an SSL/TLS peer, and can be extended to create a client or a server.
- */
 public abstract class NioSslPeer {
 
-	/**
-	 * Class' logger.
-	 */
 	protected final Logger log = Logger.getLogger(getClass());
 
-    /**
-     * Will contain this peer's application data in plaintext, that will be later encrypted
-     * using {@link SSLEngine#wrap(ByteBuffer, ByteBuffer)} and sent to the other peer. This buffer can typically
-     * be of any size, as long as it is large enough to contain this peer's outgoing messages.
-     * If this peer tries to send a message bigger than buffer's capacity a {@link BufferOverflowException}
-     * will be thrown.
-     */
     protected ByteBuffer myAppData;
 
-    /**
-     * Will contain this peer's encrypted data, that will be generated after {@link SSLEngine#wrap(ByteBuffer, ByteBuffer)}
-     * is applied on {@link NioSslPeer#myAppData}. It should be initialized using {@link SSLSession#getPacketBufferSize()},
-     * which returns the size up to which, SSL/TLS packets will be generated from the engine under a session.
-     * All SSLEngine network buffers should be sized at least this large to avoid insufficient space problems when performing wrap and unwrap calls.
-     */
     protected ByteBuffer myNetData;
 
-    /**
-     * Will contain the other peer's (decrypted) application data. It must be large enough to hold the application data
-     * from any peer. Can be initialized with {@link SSLSession#getApplicationBufferSize()} for an estimation
-     * of the other peer's application data and should be enlarged if this size is not enough.
-     */
     protected ByteBuffer peerAppData;
 
-    /**
-     * Will contain the other peer's encrypted data. The SSL/TLS protocols specify that implementations should produce packets containing at most 16 KB of plaintext,
-     * so a buffer sized to this value should normally cause no capacity problems. However, some implementations violate the specification and generate large records up to 32 KB.
-     * If the {@link SSLEngine#unwrap(ByteBuffer, ByteBuffer)} detects large inbound packets, the buffer sizes returned by SSLSession will be updated dynamically, so the this peer
-     * should check for overflow conditions and enlarge the buffer using the session's (updated) buffer size.
-     */
     protected ByteBuffer peerNetData;
 
-    /**
-     * Will be used to execute tasks that may emerge during handshake in parallel with the server's main thread.
-     */
     protected ExecutorService executor = Executors.newSingleThreadExecutor();
 
     protected abstract byte[] read(SocketChannel socketChannel, SSLEngine engine) throws Exception;

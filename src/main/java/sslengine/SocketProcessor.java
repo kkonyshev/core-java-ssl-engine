@@ -8,10 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
-/**
- *
- * Created by ka on 16/01/16.
- */
+
 public class SocketProcessor extends NioSslPeer implements Runnable {
 
     protected final Logger log = Logger.getLogger(getClass());
@@ -279,12 +276,6 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
         return data;
     }
 
-    /**
-     * Will send a message back to a client.
-     *
-     * @param data - the message to be sent.
-     * @throws IOException if an I/O error occurs to the socket channel.
-     */
     @Override
     protected void write(SocketChannel socketChannel, SSLEngine engine, byte[] data) throws IOException {
 
