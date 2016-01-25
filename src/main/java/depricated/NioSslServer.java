@@ -1,4 +1,6 @@
-package sslengine;
+package depricated;
+
+import sslengine.NioSslPeer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -8,7 +10,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Iterator;
 

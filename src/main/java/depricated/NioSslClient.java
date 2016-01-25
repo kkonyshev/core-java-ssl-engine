@@ -1,10 +1,11 @@
-package sslengine;
+package depricated;
+
+import sslengine.NioSslPeer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.net.ssl.SSLContext;
@@ -13,21 +14,10 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 
-/**
- * An SSL/TLS client that connects to a server using its IP address and port.
- * <p/>
- * After initialization of a {@link NioSslClient} object, {@link NioSslClient#connect()} should be called,
- * in order to establish connection with the server.
- * <p/>
- * When the connection between the client and the object is established, {@link NioSslClient} provides
- * a public write and read method, in order to communicate with its peer. 
- *
- */
+
 public class NioSslClient extends NioSslPeer {
 	
-    /**
-     * The remote address of the server this client is configured to connect to.
-     */
+
 	private String remoteAddress;
 
 	/**
@@ -46,15 +36,7 @@ public class NioSslClient extends NioSslPeer {
     private SocketChannel socketChannel;
 
 
-    /**
-     * Initiates the engine to run as a client using peer information, and allocates space for the
-     * buffers that will be used by the engine.
-     *
-     * @param context The SSL/TLS context to be used.
-     * @param remoteAddress The IP address of the peer.
-     * @param port The peer's port that will be used.
-     * @throws Exception
-     */
+
     public NioSslClient(String remoteAddress, int port, SSLContext context) throws Exception  {
     	this.remoteAddress = remoteAddress;
     	this.port = port;
@@ -69,12 +51,7 @@ public class NioSslClient extends NioSslPeer {
         peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     }
 
-    /**
-     * Opens a socket channel to communicate with the configured server and tries to complete the handshake protocol.
-     *
-     * @return True if client established a connection with the server, false otherwise.
-     * @throws Exception
-     */
+
     public boolean connect() throws Exception {
     	socketChannel = SocketChannel.open();
     	socketChannel.configureBlocking(false);
