@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -77,7 +78,6 @@ public class NioSslServerThreaded extends NioSslPeer {
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         
         active = true;
-        
     }
 
     private ConcurrentHashMap<SelectionKey, Object> locks = new ConcurrentHashMap<>();
@@ -91,31 +91,29 @@ public class NioSslServerThreaded extends NioSslPeer {
      * @throws Exception
      */
     public void start() throws Exception {
-
     	log.debug("Initialized and waiting for new connections...");
-
         while (isActive()) {
             selector.select();
             Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
             while (selectedKeys.hasNext()) {
                 SelectionKey key = selectedKeys.next();
-                log.debug("removing key: " + key);
+                log.trace("removing key: " + key);
                 selectedKeys.remove();
 
                 if (locks.get(key)!=null) {
-                    log.debug("in process: " + key);
+                    log.trace("in process: " + key);
                     continue;
                 }
 
                 if (!key.isValid()) {
-                    log.debug("key invalid");
+                    log.trace("key invalid");
                     continue;
                 }
                 if (key.isAcceptable()) {
-                    log.debug("accepting");
+                    log.trace("accepting");
                     accept(key);
                 } else if (key.isReadable()) {
-                    log.debug("processing new socket channel: " + key);
+                    log.trace("processing new socket channel: " + key);
                     locks.put(key, new Object());
                     acceptorService.submit(
                             new SocketProcessor(
@@ -124,7 +122,7 @@ public class NioSslServerThreaded extends NioSslPeer {
                                     new EventHandler() {
                                         @Override
                                         void onSuccessHandler() {
-                                            log.debug("removing lock from key: " + key);
+                                            log.trace("removing lock from key: " + key);
                                             locks.remove(key);
                                         }
 

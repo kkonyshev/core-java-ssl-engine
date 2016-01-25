@@ -19,8 +19,8 @@ public class DemoClient {
                 new SecureRandom()
         );
 
-        ExecutorService srv = Executors.newCachedThreadPool();
-        for (int i=0; i<1; i++) {
+        ExecutorService srv = Executors.newFixedThreadPool(4);
+        for (int i=0; i<10; i++) {
             srv.submit(new ClientCommand(context));
         }
         srv.shutdown();

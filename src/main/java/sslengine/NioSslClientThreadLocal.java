@@ -57,9 +57,9 @@ public class NioSslClientThreadLocal extends NioSslPeer {
         engine.setUseClientMode(true);
 
         SSLSession session = engine.getSession();
-        myAppData = ByteBuffer.allocate(1024000);
+        myAppData = ByteBuffer.allocate(16384);
         myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
-        peerAppData = ByteBuffer.allocate(1024000);
+        peerAppData = ByteBuffer.allocate(16384);
         peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     }
 

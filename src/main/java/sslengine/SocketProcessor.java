@@ -43,7 +43,7 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
     public void run() {
         try {
             clientData = read(socketChannel, sslEngine);
-            log.debug("writing to buffer: " + new String(clientData));
+            log.debug("writing to buffer data size: " + clientData.length);
             outStream.write(clientData);
             onSuccessHandle();
         } catch (Exception e) {
@@ -246,7 +246,7 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
                         byte[] array = peerAppData.array();
                         int arrayOffset = peerAppData.arrayOffset();
                         data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());
-                        log.debug("Incoming message: " + new String(data));
+                        log.debug("Incoming message size: " + data.length);
                         return data;
                     case BUFFER_OVERFLOW:
                         peerAppData = enlargeApplicationBuffer(engine, peerAppData);
