@@ -24,6 +24,8 @@ public class TestEngineSimple {
 
     @BeforeClass
     public static void initContext() throws Exception {
+        //System.setProperty("javax.net.debug","ssl");
+
         clientContext = SSLContext.getInstance("TLSv1.2");
         clientContext.init(
                 SSLUtils.createKeyManagers("src/test/resources/client.private", "clientpw", "clientpw"),
@@ -37,6 +39,7 @@ public class TestEngineSimple {
                 SSLUtils.createTrustManagers("src/test/resources/client.public", "public"),
                 new SecureRandom()
         );
+
     }
 
     @org.junit.Test
@@ -45,11 +48,11 @@ public class TestEngineSimple {
 
         ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9222, clientContext);
         Executor e = Executors.newFixedThreadPool(3);
-        for (int i=0; i<5; i++) {
+        for (int i=0; i<1; i++) {
             e.execute(() -> {
                     try {
                         SSLClient<SimpleRequestDto, SimpleResponseDto> client = new SimpleSSLClientImpl(clientConnectionFactory, new SimpleClientHandler());
-                        for (int j=0; j<10; j++) {
+                        for (int j=0; j<1; j++) {
                             SimpleRequestDto requestDto = new SimpleRequestDto(new Date());
                             LOG.debug("REQ: " + requestDto);
                             SimpleResponseDto responseDto = client.call(requestDto);
@@ -63,7 +66,7 @@ public class TestEngineSimple {
             );
         }
 
-        Thread.sleep(10000);
+        Thread.sleep(3000);
 
         server.stop();
     }
