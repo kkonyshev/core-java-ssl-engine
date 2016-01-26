@@ -1,8 +1,7 @@
 package sslengine;
 
 import org.apache.log4j.Logger;
-import sslengine.client.ClientConnector;
-import sslengine.handler.HandshakeHandler;
+import sslengine.client.impl.ClientConnection;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -42,9 +41,9 @@ public class DemoClient {
 
     private static class ClientCommand implements Runnable {
         private static int cnt = 0;
-        private ClientConnector client;
+        private ClientConnection client;
         public ClientCommand(SSLContext context) throws Exception {
-            this.client = new ClientConnector("localhost", 9222, context);
+            this.client = new ClientConnection("localhost", 9222, context);
         }
         @Override
         public void run() {

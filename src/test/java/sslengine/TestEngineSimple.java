@@ -2,14 +2,16 @@ package sslengine;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
-import sslengine.client.ClientConnector;
-import sslengine.handler.HandshakeHandler;
+import sslengine.client.*;
+import sslengine.client.impl.*;
+import sslengine.dto.SimpleRequestDto;
+import sslengine.dto.SimpleResponseDto;
 import sslengine.server.ServerConnectionAcceptor;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
 import java.security.SecureRandom;
-import java.util.UUID;
+import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -43,32 +45,30 @@ public class TestEngineSimple {
     public void testMultiThread() throws Exception {
         SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9222, serverContext));
 
+        ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9222, clientContext);
         Executor e = Executors.newFixedThreadPool(3);
-        for (int i=0; i<5; i++) {
+        for (int i=0; i<10; i++) {
             e.execute(new Runnable() {
                 @Override
                 public void run() {
-                    SSLClientWrapper client = null;
                     try {
-                        client = SSLClientWrapper.wrap(new ClientConnector("localhost", 9222, clientContext));
-                        for (int i=0; i<4; i++) {
-                            String req1 = UUID.randomUUID().toString();
-                            String res1 = new String(client.call(req1.getBytes()));
-                            LOG.debug("RES: " + res1);
-                            assert req1.equals(res1);
+                        SSLClient<SimpleRequestDto, SimpleResponseDto> client = new SimpleSSLClientImpl(clientConnectionFactory, new SimpleClientHandler());
+                        for (int i=0; i<5; i++) {
+                            SimpleRequestDto requestDto = new SimpleRequestDto(new Date());
+                            LOG.debug("REQ: " + requestDto);
+                            SimpleResponseDto responseDto = client.call(requestDto);
+                            LOG.debug("RES: " + responseDto);
+                            assert requestDto.requestDate==responseDto.requestDto.requestDate;
                         }
                     } catch (Exception e1) {
-                        e1.printStackTrace();
-                    } finally {
-                        if (client!=null) {
-                            client.finalize();
-                        }
+                        LOG.error(e1.getMessage(), e1);
                     }
                 }
             });
         }
 
-        Thread.sleep(10000);
+        Thread.sleep(25000);
+        //Thread.currentThread().join();
 
         server.stop();
     }

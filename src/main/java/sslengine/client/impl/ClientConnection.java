@@ -1,4 +1,4 @@
-package sslengine.client;
+package sslengine.client.impl;
 
 import sslengine.handler.HandshakeHandler;
 import sslengine.common.SSLSocketLayer;
@@ -13,7 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 
-public class ClientConnector extends SSLSocketLayer {
+public class ClientConnection extends SSLSocketLayer {
 
 	private String remoteAddress;
 
@@ -23,7 +23,7 @@ public class ClientConnector extends SSLSocketLayer {
 
     private SocketChannel socketChannel;
 
-    public ClientConnector(String remoteAddress, int port, SSLContext context) throws Exception  {
+    public ClientConnection(String remoteAddress, int port, SSLContext context)  {
     	this.remoteAddress = remoteAddress;
     	this.port = port;
 
@@ -171,7 +171,7 @@ public class ClientConnector extends SSLSocketLayer {
                         int arrayOffset = peerAppData.arrayOffset();
                         data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());
                         exitReadLoop = true;
-                        LOG.debug("Server response: " + new String(data));
+                        LOG.debug("Server response length: " + data.length);
                         break;
                     case BUFFER_OVERFLOW:
                         peerAppData = SSLUtils.enlargeApplicationBuffer(engine, peerAppData);

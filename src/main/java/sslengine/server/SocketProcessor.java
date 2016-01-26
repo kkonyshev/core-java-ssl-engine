@@ -1,8 +1,11 @@
 package sslengine.server;
 
 import org.apache.log4j.Logger;
+import sslengine.dto.SimpleRequestDto;
+import sslengine.dto.SimpleResponseDto;
 import sslengine.handler.EventHandler;
 import sslengine.common.SSLSocketLayer;
+import sslengine.utils.EncodeUtils;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.*;
@@ -10,6 +13,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
+import java.util.Date;
 
 
 public class SocketProcessor extends SSLSocketLayer implements Runnable {
@@ -47,7 +51,17 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
 
     protected void onSuccessHandle() throws IOException {
         //echo
-        write(socketChannel, sslEngine, clientData);
+        //write(socketChannel, sslEngine, clientData);
+
+        if (clientData!=null && clientData.length!=0) {
+            SimpleRequestDto clientDto = new SimpleServerHandler().decodeReq(clientData);
+            LOG.debug("clientDto: " + clientDto);
+            SimpleResponseDto serverResult = new SimpleServerRequestProcessor().process(clientDto);
+            LOG.debug("serverResult: " + serverResult);
+            byte[] localClientData = new SimpleServerHandler().encodeRes(serverResult);
+            write(socketChannel, sslEngine, localClientData);
+        }
+
         handler.onSuccessHandler();
     }
 
@@ -127,7 +141,7 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
                     while (myNetData.hasRemaining()) {
                         socketChannel.write(myNetData);
                     }
-                    log.debug("Message sent to the client: " + new String(data));
+                    log.debug("Message size sent to the client: " + data.length);
                     break;
                 case BUFFER_OVERFLOW:
                     myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
