@@ -108,7 +108,7 @@ public class ServerConnectionAcceptor {
         engine.setUseClientMode(false);
         engine.beginHandshake();
 
-        if (new HandshakeHandler().doHandshake(socketChannel, engine)) {
+        if (HandshakeHandler.doHandshake(socketChannel, engine)) {
             socketChannel.register(selector, SelectionKey.OP_READ, engine);
         } else {
             socketChannel.close();

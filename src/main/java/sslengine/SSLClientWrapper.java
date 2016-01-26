@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import sslengine.client.ClientConnector;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class SSLClientWrapper {
 
@@ -23,6 +24,7 @@ public class SSLClientWrapper {
     public byte[] call(byte[] request) throws Exception {
         LOG.debug("calling to server");
         client.write(request);
+        Thread.sleep(new Random().nextInt(1000));
         LOG.debug("reading from server");
         return client.read();
     }

@@ -50,7 +50,7 @@ public class TestEngineSimple {
                 public void run() {
                     SSLClientWrapper client = null;
                     try {
-                        client = SSLClientWrapper.wrap(new ClientConnector("localhost", 9222, clientContext, new HandshakeHandler()));
+                        client = SSLClientWrapper.wrap(new ClientConnector("localhost", 9222, clientContext));
                         for (int i=0; i<4; i++) {
                             String req1 = UUID.randomUUID().toString();
                             String res1 = new String(client.call(req1.getBytes()));
@@ -68,7 +68,7 @@ public class TestEngineSimple {
             });
         }
 
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
         server.stop();
     }

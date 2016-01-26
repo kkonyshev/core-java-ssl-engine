@@ -77,7 +77,7 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
                 switch (result.getStatus()) {
                     case OK:
                         peerAppData.flip();
-                        //log.debug("Incoming message: " + new String(peerAppData.array(), peerAppData.position(), peerAppData.limit()));
+                        //LOG.debug("Incoming message: " + new String(peerAppData.array(), peerAppData.position(), peerAppData.limit()));
                         byte[] array = peerAppData.array();
                         int arrayOffset = peerAppData.arrayOffset();
                         data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());

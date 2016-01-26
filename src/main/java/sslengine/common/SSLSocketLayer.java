@@ -10,7 +10,7 @@ import java.nio.channels.SocketChannel;
 
 public abstract class SSLSocketLayer {
 
-	protected final Logger log = Logger.getLogger(getClass());
+	protected final Logger LOG = Logger.getLogger(getClass());
 
     protected ByteBuffer myAppData;
     protected ByteBuffer myNetData;
@@ -35,7 +35,7 @@ public abstract class SSLSocketLayer {
      */
     protected void closeConnection(SocketChannel socketChannel, SSLEngine engine) throws IOException  {
         engine.closeOutbound();
-        new HandshakeHandler().doHandshake(socketChannel, engine);
+        HandshakeHandler.doHandshake(socketChannel, engine);
         socketChannel.close();
     }
 
@@ -53,7 +53,7 @@ public abstract class SSLSocketLayer {
         try {
             engine.closeInbound();
         } catch (Exception e) {
-            log.error("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
+            LOG.error("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
         }
         closeConnection(socketChannel, engine);
     }

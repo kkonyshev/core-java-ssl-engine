@@ -44,7 +44,7 @@ public class DemoClient {
         private static int cnt = 0;
         private ClientConnector client;
         public ClientCommand(SSLContext context) throws Exception {
-            this.client = new ClientConnector("localhost", 9222, context, new HandshakeHandler());
+            this.client = new ClientConnector("localhost", 9222, context);
         }
         @Override
         public void run() {

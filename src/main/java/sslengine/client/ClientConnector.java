@@ -22,13 +22,10 @@ public class ClientConnector extends SSLSocketLayer {
     private SSLEngine engine;
 
     private SocketChannel socketChannel;
-    private HandshakeHandler handshakeHandler;
 
-    public ClientConnector(String remoteAddress, int port, SSLContext context, HandshakeHandler handshakeHandler) throws Exception  {
+    public ClientConnector(String remoteAddress, int port, SSLContext context) throws Exception  {
     	this.remoteAddress = remoteAddress;
     	this.port = port;
-
-        this.handshakeHandler = handshakeHandler;
 
         engine = context.createSSLEngine(remoteAddress, port);
         engine.setUseClientMode(true);
@@ -50,7 +47,7 @@ public class ClientConnector extends SSLSocketLayer {
     	}
 
     	engine.beginHandshake();
-    	return handshakeHandler.doHandshake(socketChannel, engine);
+    	return HandshakeHandler.doHandshake(socketChannel, engine);
     }
 
 
@@ -62,7 +59,7 @@ public class ClientConnector extends SSLSocketLayer {
     @Override
     protected void write(SocketChannel socketChannel, SSLEngine engine, byte[] data) throws IOException {
 
-        log.debug("About to write to the server...");
+        LOG.debug("About to write to the server...");
 
         myAppData.clear();
         myAppData.put(data);
@@ -78,7 +75,7 @@ public class ClientConnector extends SSLSocketLayer {
                 while (myNetData.hasRemaining()) {
                     socketChannel.write(myNetData);
                 }
-                log.debug("Message sent to the server, size: " + data.length);
+                LOG.debug("Message sent to the server, size: " + data.length);
                 break;
             case BUFFER_OVERFLOW:
                 myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
@@ -100,7 +97,7 @@ public class ClientConnector extends SSLSocketLayer {
     }
 
     protected void writeFromBuffer(SocketChannel socketChannel, SSLEngine engine, InputStream ios) throws IOException {
-        log.debug("About to write to the server...");
+        LOG.debug("About to write to the server...");
 
         byte[] buffer = new byte[1024];
         int read = 0;
@@ -116,7 +113,7 @@ public class ClientConnector extends SSLSocketLayer {
             myAppData.put(buffer);
             myAppData.flip();
             totalRead = totalRead + read;
-            log.debug("total bytes read: " + totalRead);
+            LOG.debug("total bytes read: " + totalRead);
 
             myNetData.clear();
             SSLEngineResult result = engine.wrap(myAppData, myNetData);
@@ -126,7 +123,7 @@ public class ClientConnector extends SSLSocketLayer {
                     while (myNetData.hasRemaining()) {
                         socketChannel.write(myNetData);
                     }
-                    //log.debug("Message sent to the server: " + new String(buffer));
+                    //LOG.debug("Message sent to the server: " + new String(buffer));
                     break;
                 case BUFFER_OVERFLOW:
                     myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
@@ -152,7 +149,7 @@ public class ClientConnector extends SSLSocketLayer {
     @Override
     protected byte[] read(SocketChannel socketChannel, SSLEngine engine) throws Exception  {
 
-        log.debug("About to read from the server...");
+        LOG.debug("About to read from the server...");
 
         byte[] data = new byte[0];
 
@@ -169,12 +166,12 @@ public class ClientConnector extends SSLSocketLayer {
                     switch (result.getStatus()) {
                     case OK:
                         peerAppData.flip();
-                        //log.debug("Server response: " + new String(peerAppData.array(), peerAppData.position(), peerAppData.limit()));
+                        //LOG.debug("Server response: " + new String(peerAppData.array(), peerAppData.position(), peerAppData.limit()));
                         byte[] array = peerAppData.array();
                         int arrayOffset = peerAppData.arrayOffset();
                         data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());
                         exitReadLoop = true;
-                        log.debug("Server response: " + new String(data));
+                        LOG.debug("Server response: " + new String(data));
                         break;
                     case BUFFER_OVERFLOW:
                         peerAppData = SSLUtils.enlargeApplicationBuffer(engine, peerAppData);
@@ -201,10 +198,9 @@ public class ClientConnector extends SSLSocketLayer {
     }
 
     public void shutdown() throws IOException {
-        log.debug("About to close connection with the server...");
+        LOG.debug("About to close connection with the server...");
         closeConnection(socketChannel, engine);
-        handshakeHandler.finalize();
-        log.debug("Goodbye!");
+        LOG.debug("Goodbye!");
     }
 
 }

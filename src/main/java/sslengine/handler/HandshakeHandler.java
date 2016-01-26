@@ -14,12 +14,12 @@ import java.util.concurrent.Executors;
 
 public class HandshakeHandler {
 
-    protected final Logger log = Logger.getLogger(getClass());
+    private static final Logger log = Logger.getLogger(HandshakeHandler.class);
 
-    protected ByteBuffer myNetData;
-    protected ByteBuffer peerNetData;
+    private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    protected ExecutorService executor = Executors.newSingleThreadExecutor();
+    protected HandshakeHandler() {
+    }
 
     /**
      * Implements the handshake protocol between two peers, required for the establishment of the SSL/TLS connection.
@@ -49,7 +49,7 @@ public class HandshakeHandler {
      * @return True if the connection handshake was successful or false if an error occurred.
      * @throws IOException - if an error occurs during read/write to the socket channel.
      */
-    public boolean doHandshake(SocketChannel socketChannel, SSLEngine engine) throws IOException {
+    public static boolean doHandshake(SocketChannel socketChannel, SSLEngine engine) throws IOException {
 
         log.debug("About to do handshake...");
 
@@ -63,8 +63,8 @@ public class HandshakeHandler {
         // to be used for the handshake, while keeping client's buffers at the same size.
         int appBufferSize = engine.getSession().getApplicationBufferSize();
 
-        myNetData = ByteBuffer.allocate(appBufferSize);
-        peerNetData = ByteBuffer.allocate(appBufferSize);
+        ByteBuffer myNetData = ByteBuffer.allocate(appBufferSize);
+        ByteBuffer peerNetData = ByteBuffer.allocate(appBufferSize);
 
         ByteBuffer myAppData = ByteBuffer.allocate(appBufferSize);
         ByteBuffer peerAppData = ByteBuffer.allocate(appBufferSize);
@@ -192,7 +192,5 @@ public class HandshakeHandler {
         } catch (Throwable throwable) {
             log.error(throwable.getMessage(), throwable);
         }
-        log.debug("Handshake handler finalizing work");
-        executor.shutdown();
     }
 }
