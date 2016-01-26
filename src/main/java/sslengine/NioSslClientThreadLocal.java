@@ -70,10 +70,10 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                 while (myNetData.hasRemaining()) {
                     socketChannel.write(myNetData);
                 }
-                log.debug("Message sent to the server, size: " + data.length);
+                log.debug("Message sent to the server, size: " + new String(data));
                 break;
             case BUFFER_OVERFLOW:
-                myNetData = enlargePacketBuffer(engine, myNetData);
+                myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
                 break;
             case BUFFER_UNDERFLOW:
                 throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
@@ -121,7 +121,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                     //log.debug("Message sent to the server: " + new String(buffer));
                     break;
                 case BUFFER_OVERFLOW:
-                    myNetData = enlargePacketBuffer(engine, myNetData);
+                    myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
                     break;
                 case BUFFER_UNDERFLOW:
                     throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
@@ -169,10 +169,10 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                         log.debug("Server response: " + new String(data));
                         break;
                     case BUFFER_OVERFLOW:
-                        peerAppData = enlargeApplicationBuffer(engine, peerAppData);
+                        peerAppData = SSLUtils.enlargeApplicationBuffer(engine, peerAppData);
                         break;
                     case BUFFER_UNDERFLOW:
-                        peerNetData = handleBufferUnderflow(engine, peerNetData);
+                        peerNetData = SSLUtils.handleBufferUnderflow(engine, peerNetData);
                         break;
                     case CLOSED:
                         closeConnection(socketChannel, engine);

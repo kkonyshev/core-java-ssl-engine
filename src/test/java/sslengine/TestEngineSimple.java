@@ -6,6 +6,7 @@ import org.junit.BeforeClass;
 import javax.net.ssl.SSLContext;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -47,8 +48,12 @@ public class TestEngineSimple {
                     SSLClientWrapper client = null;
                     try {
                         client = SSLClientWrapper.wrap(new NioSslClientThreadLocal("localhost", 9222, clientContext));
-                        LOG.debug("RES: " + new String(client.call("req".getBytes())));
-                        LOG.debug("RES: " + new String(client.call("request".getBytes())));
+                        for (int i=0; i<4; i++) {
+                            String req1 = UUID.randomUUID().toString();
+                            String res1 = new String(client.call(req1.getBytes()));
+                            LOG.debug("RES: " + res1);
+                            assert req1.equals(res1);
+                        }
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     } finally {

@@ -159,10 +159,10 @@ public class NioSslServerThreaded extends NioSslPeer {
                     data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());
                     break;
                 case BUFFER_OVERFLOW:
-                    peerAppData = enlargeApplicationBuffer(engine, peerAppData);
+                    peerAppData = SSLUtils.enlargeApplicationBuffer(engine, peerAppData);
                     break;
                 case BUFFER_UNDERFLOW:
-                    peerNetData = handleBufferUnderflow(engine, peerNetData);
+                    peerNetData = SSLUtils.handleBufferUnderflow(engine, peerNetData);
                     break;
                 case CLOSED:
                     log.debug("Client wants to close connection...");
@@ -209,7 +209,7 @@ public class NioSslServerThreaded extends NioSslPeer {
                 closeConnection(socketChannel, engine);
                 break;
             case BUFFER_OVERFLOW:
-                myNetData = enlargePacketBuffer(engine, myNetData);
+                myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
                 break;
             case BUFFER_UNDERFLOW:
                 throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
