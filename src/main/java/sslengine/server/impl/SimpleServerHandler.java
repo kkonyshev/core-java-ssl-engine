@@ -1,7 +1,8 @@
-package sslengine.server;
+package sslengine.server.impl;
 
 import sslengine.dto.SimpleRequestDto;
 import sslengine.dto.SimpleResponseDto;
+import sslengine.server.ServerHandler;
 import sslengine.utils.EncodeUtils;
 
 public class SimpleServerHandler implements ServerHandler<SimpleRequestDto, SimpleResponseDto> {

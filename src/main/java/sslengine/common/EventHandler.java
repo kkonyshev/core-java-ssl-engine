@@ -1,4 +1,4 @@
-package sslengine.handler;
+package sslengine.common;
 
 public abstract class EventHandler {
     public abstract void onSuccessHandler();

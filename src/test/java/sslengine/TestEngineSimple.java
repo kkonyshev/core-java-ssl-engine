@@ -6,7 +6,7 @@ import sslengine.client.*;
 import sslengine.client.impl.*;
 import sslengine.dto.SimpleRequestDto;
 import sslengine.dto.SimpleResponseDto;
-import sslengine.server.ServerConnectionAcceptor;
+import sslengine.server.impl.ServerConnectionAcceptor;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -21,8 +21,6 @@ public class TestEngineSimple {
 
     private static SSLContext clientContext;
     private static SSLContext serverContext;
-
-    private ServerConnectionAcceptor server;
 
     @BeforeClass
     public static void initContext() throws Exception {
@@ -47,13 +45,11 @@ public class TestEngineSimple {
 
         ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9222, clientContext);
         Executor e = Executors.newFixedThreadPool(3);
-        for (int i=0; i<10; i++) {
-            e.execute(new Runnable() {
-                @Override
-                public void run() {
+        for (int i=0; i<5; i++) {
+            e.execute(() -> {
                     try {
                         SSLClient<SimpleRequestDto, SimpleResponseDto> client = new SimpleSSLClientImpl(clientConnectionFactory, new SimpleClientHandler());
-                        for (int i=0; i<5; i++) {
+                        for (int j=0; j<10; j++) {
                             SimpleRequestDto requestDto = new SimpleRequestDto(new Date());
                             LOG.debug("REQ: " + requestDto);
                             SimpleResponseDto responseDto = client.call(requestDto);
@@ -64,11 +60,10 @@ public class TestEngineSimple {
                         LOG.error(e1.getMessage(), e1);
                     }
                 }
-            });
+            );
         }
 
-        Thread.sleep(25000);
-        //Thread.currentThread().join();
+        Thread.sleep(10000);
 
         server.stop();
     }

@@ -1,7 +1,7 @@
 package sslengine;
 
 import org.apache.log4j.Logger;
-import sslengine.server.ServerConnectionAcceptor;
+import sslengine.server.impl.ServerConnectionAcceptor;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -37,7 +37,7 @@ public class SSLServerProcess {
         @Override
         public void run() {
             try {
-                LOG.debug("Starting server thread process");
+                LOG.info("Starting server thread process");
                 server.start();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -50,7 +50,7 @@ public class SSLServerProcess {
             if (server!=null) {
                 server.stop();
             }
-            LOG.debug("Server stopped");
+            LOG.info("Server stopped");
         }
     }
 }

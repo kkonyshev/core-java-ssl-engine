@@ -1,29 +1,25 @@
-package sslengine.server;
+package sslengine.server.impl;
 
-import org.apache.log4j.Logger;
-import sslengine.dto.SimpleRequestDto;
-import sslengine.dto.SimpleResponseDto;
-import sslengine.handler.EventHandler;
+import sslengine.common.EventHandler;
 import sslengine.common.SSLSocketLayer;
-import sslengine.utils.EncodeUtils;
 import sslengine.utils.SSLUtils;
 
-import javax.net.ssl.*;
-import java.io.*;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
-import java.util.Date;
 
 
-public class SocketProcessor extends SSLSocketLayer implements Runnable {
+abstract class SocketProcessor extends SSLSocketLayer implements Runnable {
 
-    private final Logger log = Logger.getLogger(getClass());
-
-    private SSLEngine       sslEngine;
-    private EventHandler    handler;
-    private SocketChannel   socketChannel;
-    private byte[]          clientData;
+    private SSLEngine sslEngine;
+    private EventHandler handler;
+    private SocketChannel socketChannel;
 
     public SocketProcessor(SocketChannel socketChannel, SSLEngine sslEngine, EventHandler handler) throws FileNotFoundException {
         this.socketChannel = socketChannel;
@@ -41,29 +37,17 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
     @Override
     public void run() {
         try {
-            clientData = read(socketChannel, sslEngine);
-            log.debug("writing to buffer data size: " + new String(clientData));
-            onSuccessHandle();
+            byte[] clientData = read(socketChannel, sslEngine);
+            LOG.debug("writing to buffer data size: " + clientData.length);
+            byte[] resultData = processRequest(clientData);
+            write(socketChannel, sslEngine, resultData);
+            handler.onSuccessHandler();
         } catch (Exception e) {
             handler.onErrorHandler(e);
         }
     }
 
-    protected void onSuccessHandle() throws IOException {
-        //echo
-        //write(socketChannel, sslEngine, clientData);
-
-        if (clientData!=null && clientData.length!=0) {
-            SimpleRequestDto clientDto = new SimpleServerHandler().decodeReq(clientData);
-            LOG.debug("clientDto: " + clientDto);
-            SimpleResponseDto serverResult = new SimpleServerRequestProcessor().process(clientDto);
-            LOG.debug("serverResult: " + serverResult);
-            byte[] localClientData = new SimpleServerHandler().encodeRes(serverResult);
-            write(socketChannel, sslEngine, localClientData);
-        }
-
-        handler.onSuccessHandler();
-    }
+    abstract byte[] processRequest(byte[] clientData) throws IOException;
 
     /**
      * Will be called by the selector when the specific socket channel has data to be read.
@@ -76,8 +60,7 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
      */
     @Override
     protected byte[] read(SocketChannel socketChannel, SSLEngine engine) throws IOException {
-
-        log.debug("About to read from a client...");
+        LOG.debug("Server is reading from a client...");
 
         byte[] data = new byte[0];
 
@@ -95,7 +78,7 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
                         byte[] array = peerAppData.array();
                         int arrayOffset = peerAppData.arrayOffset();
                         data = Arrays.copyOfRange(array, arrayOffset + peerAppData.position(), arrayOffset + peerAppData.limit());
-                        log.debug("Incoming message size: " + data.length);
+                        LOG.debug("Incoming message size: " + data.length);
                         return data;
                     case BUFFER_OVERFLOW:
                         peerAppData = SSLUtils.enlargeApplicationBuffer(engine, peerAppData);
@@ -104,9 +87,9 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
                         peerNetData = SSLUtils.handleBufferUnderflow(engine, peerNetData);
                         break;
                     case CLOSED:
-                        log.debug("Client wants to close connection...");
+                        LOG.debug("Client wants to close connection...");
                         closeConnection(socketChannel, engine);
-                        log.debug("Goodbye client!");
+                        LOG.debug("Goodbye client!");
                         return data;
                     default:
                         throw new IllegalStateException("Invalid SSL status: " + result.getStatus());
@@ -114,9 +97,9 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
             }
 
         } else if (bytesRead < 0) {
-            log.error("Received end of stream. Will try to close connection with client...");
+            LOG.error("Received end of stream. Will try to close connection with client...");
             handleEndOfStream(socketChannel, engine);
-            log.debug("Goodbye client!");
+            LOG.debug("Goodbye client!");
         }
 
         return data;
@@ -124,8 +107,7 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
 
     @Override
     protected void write(SocketChannel socketChannel, SSLEngine engine, byte[] data) throws IOException {
-
-        log.debug("About to write to a client...");
+        LOG.debug("Server writing to a client...");
 
         myAppData.clear();
         myAppData.put(data);
@@ -141,13 +123,13 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
                     while (myNetData.hasRemaining()) {
                         socketChannel.write(myNetData);
                     }
-                    log.debug("Message size sent to the client: " + data.length);
+                    LOG.debug("Message size sent to the client: " + data.length);
                     break;
                 case BUFFER_OVERFLOW:
                     myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
                     break;
                 case BUFFER_UNDERFLOW:
-                    throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
+                    throw new SSLException("Buffer underflow occurred after a wrap. I don't think we should ever get here.");
                 case CLOSED:
                     closeConnection(socketChannel, engine);
                     return;

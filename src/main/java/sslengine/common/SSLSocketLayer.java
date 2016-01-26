@@ -1,7 +1,6 @@
 package sslengine.common;
 
 import org.apache.log4j.Logger;
-import sslengine.handler.HandshakeHandler;
 
 import javax.net.ssl.SSLEngine;
 import java.io.IOException;
@@ -36,6 +35,7 @@ public abstract class SSLSocketLayer {
     protected void closeConnection(SocketChannel socketChannel, SSLEngine engine) throws IOException  {
         engine.closeOutbound();
         HandshakeHandler.doHandshake(socketChannel, engine);
+        LOG.info("Closing connection: " + socketChannel.getRemoteAddress());
         socketChannel.close();
     }
 

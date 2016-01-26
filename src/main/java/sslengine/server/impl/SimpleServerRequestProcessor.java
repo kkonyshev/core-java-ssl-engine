@@ -1,7 +1,8 @@
-package sslengine.server;
+package sslengine.server.impl;
 
 import sslengine.dto.SimpleRequestDto;
 import sslengine.dto.SimpleResponseDto;
+import sslengine.server.ServerRequestProcessor;
 
 import java.util.Date;
 

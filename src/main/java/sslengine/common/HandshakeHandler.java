@@ -1,4 +1,4 @@
-package sslengine.handler;
+package sslengine.common;
 
 import org.apache.log4j.Logger;
 import sslengine.utils.SSLUtils;
@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class HandshakeHandler {
 
-    private static final Logger log = Logger.getLogger(HandshakeHandler.class);
+    private static final Logger LOG = Logger.getLogger(HandshakeHandler.class);
 
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -50,8 +50,7 @@ public class HandshakeHandler {
      * @throws IOException - if an error occurs during read/write to the socket channel.
      */
     public static boolean doHandshake(SocketChannel socketChannel, SSLEngine engine) throws IOException {
-
-        log.debug("About to do handshake...");
+        LOG.debug("handshaking...");
 
         SSLEngineResult result;
         SSLEngineResult.HandshakeStatus handshakeStatus;
@@ -83,7 +82,7 @@ public class HandshakeHandler {
                         try {
                             engine.closeInbound();
                         } catch (SSLException e) {
-                            log.error("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
+                            LOG.error("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
                         }
                         engine.closeOutbound();
                         // After closeOutbound the engine will be set to WRAP state, in order to try to send a close message to the client.
@@ -96,7 +95,7 @@ public class HandshakeHandler {
                         peerNetData.compact();
                         handshakeStatus = result.getHandshakeStatus();
                     } catch (SSLException sslException) {
-                        log.error("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
+                        LOG.error("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
                         engine.closeOutbound();
                         handshakeStatus = engine.getHandshakeStatus();
                         break;
@@ -130,7 +129,7 @@ public class HandshakeHandler {
                         result = engine.wrap(myAppData, myNetData);
                         handshakeStatus = result.getHandshakeStatus();
                     } catch (SSLException sslException) {
-                        log.error("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
+                        LOG.error("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
                         engine.closeOutbound();
                         handshakeStatus = engine.getHandshakeStatus();
                         break;
@@ -159,7 +158,7 @@ public class HandshakeHandler {
                                 // At this point the handshake status will probably be NEED_UNWRAP so we make sure that peerNetData is clear to read.
                                 peerNetData.clear();
                             } catch (Exception e) {
-                                log.error("Failed to send server's CLOSE message due to socket channel's failure.");
+                                LOG.error("Failed to send server's CLOSE message due to socket channel's failure.");
                                 handshakeStatus = engine.getHandshakeStatus();
                             }
                             break;
@@ -190,7 +189,7 @@ public class HandshakeHandler {
         try {
             super.finalize();
         } catch (Throwable throwable) {
-            log.error(throwable.getMessage(), throwable);
+            LOG.error(throwable.getMessage(), throwable);
         }
     }
 }

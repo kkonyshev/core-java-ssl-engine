@@ -1,12 +1,11 @@
 package sslengine.client.impl;
 
-import sslengine.handler.HandshakeHandler;
+import sslengine.common.HandshakeHandler;
 import sslengine.common.SSLSocketLayer;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -43,8 +42,10 @@ public class ClientConnection extends SSLSocketLayer {
     	socketChannel.configureBlocking(false);
     	socketChannel.connect(new InetSocketAddress(remoteAddress, port));
     	while (!socketChannel.finishConnect()) {
-    		// can do something here...
-    	}
+            Thread.sleep(100);
+            LOG.trace("wait for connection.");
+        }
+        LOG.info("Open connection to: " + socketChannel.getLocalAddress());
 
     	engine.beginHandshake();
     	return HandshakeHandler.doHandshake(socketChannel, engine);
@@ -58,9 +59,7 @@ public class ClientConnection extends SSLSocketLayer {
 
     @Override
     protected void write(SocketChannel socketChannel, SSLEngine engine, byte[] data) throws IOException {
-
-        LOG.debug("About to write to the server...");
-
+        LOG.debug("Client writing to the server...");
         myAppData.clear();
         myAppData.put(data);
         myAppData.flip();
@@ -92,55 +91,6 @@ public class ClientConnection extends SSLSocketLayer {
 
     }
 
-    public void writeStream(InputStream ios) throws IOException {
-        writeFromBuffer(socketChannel, engine, ios);
-    }
-
-    protected void writeFromBuffer(SocketChannel socketChannel, SSLEngine engine, InputStream ios) throws IOException {
-        LOG.debug("About to write to the server...");
-
-        byte[] buffer = new byte[1024];
-        int read = 0;
-        int totalRead = 0;
-
-        //myAppData.clear();
-        //myAppData.put(buffer);
-        //myAppData.flip();
-        while ((read = ios.read(buffer)) != -1) {
-            // The loop has a meaning for (outgoing) messages larger than 16KB.
-            // Every wrap call will remove 16KB from the original message and send it to the remote peer.
-            myAppData.clear();
-            myAppData.put(buffer);
-            myAppData.flip();
-            totalRead = totalRead + read;
-            LOG.debug("total bytes read: " + totalRead);
-
-            myNetData.clear();
-            SSLEngineResult result = engine.wrap(myAppData, myNetData);
-            switch (result.getStatus()) {
-                case OK:
-                    myNetData.flip();
-                    while (myNetData.hasRemaining()) {
-                        socketChannel.write(myNetData);
-                    }
-                    //LOG.debug("Message sent to the server: " + new String(buffer));
-                    break;
-                case BUFFER_OVERFLOW:
-                    myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
-                    break;
-                case BUFFER_UNDERFLOW:
-                    throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
-                case CLOSED:
-                    closeConnection(socketChannel, engine);
-                    return;
-                default:
-                    throw new IllegalStateException("Invalid SSL status: " + result.getStatus());
-            }
-        }
-
-    }
-
-
     public byte[] read() throws Exception {
         return read(socketChannel, engine);
     }
@@ -148,8 +98,7 @@ public class ClientConnection extends SSLSocketLayer {
 
     @Override
     protected byte[] read(SocketChannel socketChannel, SSLEngine engine) throws Exception  {
-
-        LOG.debug("About to read from the server...");
+        LOG.debug("Client reading from the server...");
 
         byte[] data = new byte[0];
 
