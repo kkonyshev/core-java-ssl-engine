@@ -1,7 +1,10 @@
 package sslengine;
 
+import sslengine.utils.SSLUtils;
+
 import javax.net.ssl.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -17,10 +20,13 @@ public class NioSslClientThreadLocal extends NioSslPeer {
     private SSLEngine engine;
 
     private SocketChannel socketChannel;
+    private HandshakeHandler handshakeHandler;
 
-    public NioSslClientThreadLocal(String remoteAddress, int port, SSLContext context) throws Exception  {
+    public NioSslClientThreadLocal(String remoteAddress, int port, SSLContext context, HandshakeHandler handshakeHandler) throws Exception  {
     	this.remoteAddress = remoteAddress;
     	this.port = port;
+
+        this.handshakeHandler = handshakeHandler;
 
         engine = context.createSSLEngine(remoteAddress, port);
         engine.setUseClientMode(true);
@@ -42,7 +48,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
     	}
 
     	engine.beginHandshake();
-    	return doHandshake(socketChannel, engine);
+    	return handshakeHandler.doHandshake(socketChannel, engine);
     }
 
 
@@ -76,7 +82,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                 myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);
                 break;
             case BUFFER_UNDERFLOW:
-                throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
+                throw new SSLException("Buffer underflow occurred after a wrap. I don't think we should ever get here.");
             case CLOSED:
                 closeConnection(socketChannel, engine);
                 return;
@@ -195,7 +201,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
     public void shutdown() throws IOException {
         log.debug("About to close connection with the server...");
         closeConnection(socketChannel, engine);
-        executor.shutdown();
+        handshakeHandler.finalize();
         log.debug("Goodbye!");
     }
 

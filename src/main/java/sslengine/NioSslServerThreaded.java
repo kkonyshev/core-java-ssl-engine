@@ -1,5 +1,7 @@
 package sslengine;
 
+import sslengine.utils.SSLUtils;
+
 import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,18 +20,14 @@ import java.util.concurrent.Executors;
 
 public class NioSslServerThreaded extends NioSslPeer {
 
-	private boolean active;
+    private SSLContext  context;
+    private Selector    selector;
+    private boolean     active;
 
-
-    private SSLContext context;
-
-    private Selector selector;
-
-    protected ExecutorService acceptorService = Executors.newCachedThreadPool();
-
+    private ConcurrentHashMap<SelectionKey, Object> sessionKeys = new ConcurrentHashMap<>();
+    private ExecutorService acceptorService = Executors.newCachedThreadPool();
 
     public NioSslServerThreaded(String hostAddress, int port, SSLContext context) throws Exception {
-
         this.context = context;
         SSLSession dummySession = context.createSSLEngine().getSession();
         myAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());
@@ -43,12 +41,9 @@ public class NioSslServerThreaded extends NioSslPeer {
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.socket().bind(new InetSocketAddress(hostAddress, port));
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-        
+
         active = true;
     }
-
-    private ConcurrentHashMap<SelectionKey, Object> locks = new ConcurrentHashMap<>();
-
 
     public void start() throws Exception {
     	log.debug("Initialized and waiting for new connections...");
@@ -60,7 +55,7 @@ public class NioSslServerThreaded extends NioSslPeer {
                 log.trace("removing key: " + key);
                 selectedKeys.remove();
 
-                if (locks.get(key)!=null) {
+                if (sessionKeys.get(key)!=null) {
                     log.trace("in process: " + key);
                     continue;
                 }
@@ -74,7 +69,7 @@ public class NioSslServerThreaded extends NioSslPeer {
                     accept(key);
                 } else if (key.isReadable()) {
                     log.trace("processing new socket channel: " + key);
-                    locks.put(key, new Object());
+                    sessionKeys.put(key, new Object());
                     acceptorService.submit(
                             new SocketProcessor(
                                     (SocketChannel) key.channel(),
@@ -83,13 +78,13 @@ public class NioSslServerThreaded extends NioSslPeer {
                                         @Override
                                         void onSuccessHandler() {
                                             log.trace("removing lock from key: " + key);
-                                            locks.remove(key);
+                                            sessionKeys.remove(key);
                                         }
 
                                         @Override
                                         void onErrorHandler(Exception e) {
                                             log.error(e.getMessage(), e);
-                                            locks.remove(key);
+                                            sessionKeys.remove(key);
                                         }
                                     }));
                 }
@@ -102,19 +97,10 @@ public class NioSslServerThreaded extends NioSslPeer {
     public void stop() {
     	log.debug("Will now close server...");
     	active = false;
-    	executor.shutdown();
         acceptorService.shutdown();
     	selector.wakeup();
     }
 
-    /**
-     * Will be called after a new connection request arrives to the server. Creates the {@link SocketChannel} that will
-     * be used as the network layer link, and the {@link SSLEngine} that will encrypt and decrypt all the data
-     * that will be exchanged during the session with this specific client.
-     *
-     * @param key - the key dedicated to the {@link ServerSocketChannel} used by the server to listen to new connection requests.
-     * @throws Exception
-     */
     private void accept(SelectionKey key) throws Exception {
 
     	log.debug("New connection request!");
@@ -126,11 +112,11 @@ public class NioSslServerThreaded extends NioSslPeer {
         engine.setUseClientMode(false);
         engine.beginHandshake();
 
-        if (doHandshake(socketChannel, engine)) {
+        if (new HandshakeHandler().doHandshake(socketChannel, engine)) {
             socketChannel.register(selector, SelectionKey.OP_READ, engine);
         } else {
             socketChannel.close();
-            locks.remove(key);
+            sessionKeys.remove(key);
             log.debug("Connection closed due to handshake failure.");
         }
     }

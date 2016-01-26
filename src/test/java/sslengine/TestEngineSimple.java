@@ -2,9 +2,9 @@ package sslengine;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
+import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -47,7 +47,7 @@ public class TestEngineSimple {
                 public void run() {
                     SSLClientWrapper client = null;
                     try {
-                        client = SSLClientWrapper.wrap(new NioSslClientThreadLocal("localhost", 9222, clientContext));
+                        client = SSLClientWrapper.wrap(new NioSslClientThreadLocal("localhost", 9222, clientContext, new HandshakeHandler()));
                         for (int i=0; i<4; i++) {
                             String req1 = UUID.randomUUID().toString();
                             String res1 = new String(client.call(req1.getBytes()));
@@ -57,7 +57,9 @@ public class TestEngineSimple {
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     } finally {
-                        client.finalize();
+                        if (client!=null) {
+                            client.finalize();
+                        }
                     }
                 }
             });

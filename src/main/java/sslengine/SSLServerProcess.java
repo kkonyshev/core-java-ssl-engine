@@ -7,8 +7,6 @@ import java.util.concurrent.Executors;
 
 public class SSLServerProcess {
 
-    protected final Logger LOG = Logger.getLogger(getClass());
-
     private Executor serverThread = Executors.newSingleThreadExecutor();
     private ServerThread command;
 

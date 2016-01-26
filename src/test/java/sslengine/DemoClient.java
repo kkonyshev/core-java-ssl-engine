@@ -1,7 +1,8 @@
 package sslengine;
 
+import sslengine.utils.SSLUtils;
+
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +31,7 @@ public class DemoClient {
         private static int cnt = 0;
         private NioSslClientThreadLocal client;
         public ClientCommand(SSLContext context) throws Exception {
-            this.client = new NioSslClientThreadLocal("localhost", 9222, context);
+            this.client = new NioSslClientThreadLocal("localhost", 9222, context, new HandshakeHandler());
         }
         @Override
         public void run() {

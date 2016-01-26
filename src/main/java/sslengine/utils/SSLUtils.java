@@ -1,4 +1,4 @@
-package sslengine;
+package sslengine.utils;
 
 import javax.net.ssl.*;
 import java.io.FileInputStream;
@@ -44,7 +44,6 @@ public class SSLUtils {
      * @param buffer - will always be peerNetData buffer.
      * @param engine - the engine used for encryption/decryption of the data exchanged between the two peers.
      * @return The same buffer if there is no space problem or a new buffer with the same data but more space.
-     * @throws Exception
      */
     public static ByteBuffer handleBufferUnderflow(SSLEngine engine, ByteBuffer buffer) {
         if (buffer.position() < buffer.limit()) {
@@ -59,13 +58,8 @@ public class SSLUtils {
 
     public static KeyManager[] createKeyManagers(String filepath, String keystorePassword, String keyPassword) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("JKS");
-        InputStream keyStoreIS = new FileInputStream(filepath);
-        try {
+        try (InputStream keyStoreIS = new FileInputStream(filepath)) {
             keyStore.load(keyStoreIS, keystorePassword.toCharArray());
-        } finally {
-            if (keyStoreIS != null) {
-                keyStoreIS.close();
-            }
         }
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(keyStore, keyPassword.toCharArray());
@@ -74,13 +68,8 @@ public class SSLUtils {
 
     public static TrustManager[] createTrustManagers(String filepath, String keystorePassword) throws Exception {
         KeyStore trustStore = KeyStore.getInstance("JKS");
-        InputStream trustStoreIS = new FileInputStream(filepath);
-        try {
+        try (InputStream trustStoreIS = new FileInputStream(filepath)) {
             trustStore.load(trustStoreIS, keystorePassword.toCharArray());
-        } finally {
-            if (trustStoreIS != null) {
-                trustStoreIS.close();
-            }
         }
         TrustManagerFactory trustFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustFactory.init(trustStore);
