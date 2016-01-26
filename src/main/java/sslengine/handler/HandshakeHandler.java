@@ -16,10 +16,7 @@ public class HandshakeHandler {
 
     protected final Logger log = Logger.getLogger(getClass());
 
-    protected ByteBuffer myNetData;
-    protected ByteBuffer peerNetData;
-
-    protected ExecutorService executor = Executors.newSingleThreadExecutor();
+    protected ExecutorService executor = Executors.newFixedThreadPool(10);
 
     /**
      * Implements the handshake protocol between two peers, required for the establishment of the SSL/TLS connection.
@@ -56,15 +53,14 @@ public class HandshakeHandler {
         SSLEngineResult result;
         SSLEngineResult.HandshakeStatus handshakeStatus;
 
-
         // SSLSocketLayer's fields myAppData and peerAppData are supposed to be large enough to hold all message data the peer
         // will send and expects to receive from the other peer respectively. Since the messages to be exchanged will usually be less
         // than 16KB long the capacity of these fields should also be smaller. Here we initialize these two local buffers
         // to be used for the handshake, while keeping client's buffers at the same size.
         int appBufferSize = engine.getSession().getApplicationBufferSize();
 
-        myNetData = ByteBuffer.allocate(appBufferSize);
-        peerNetData = ByteBuffer.allocate(appBufferSize);
+        ByteBuffer myNetData = ByteBuffer.allocate(appBufferSize);
+        ByteBuffer peerNetData = ByteBuffer.allocate(appBufferSize);
 
         ByteBuffer myAppData = ByteBuffer.allocate(appBufferSize);
         ByteBuffer peerAppData = ByteBuffer.allocate(appBufferSize);

@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
-
 public class SocketProcessor extends SSLSocketLayer implements Runnable {
 
     private final Logger log = Logger.getLogger(getClass());

@@ -13,18 +13,16 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 
-public class ClientConnector extends SSLSocketLayer {
+public class ClientConnection extends SSLSocketLayer {
 
-	private String remoteAddress;
+    private SSLEngine   engine;
+    private String      remoteAddress;
+    private int         port;
 
-	private int port;
+    private SocketChannel       socketChannel;
+    private HandshakeHandler    handshakeHandler;
 
-    private SSLEngine engine;
-
-    private SocketChannel socketChannel;
-    private HandshakeHandler handshakeHandler;
-
-    public ClientConnector(String remoteAddress, int port, SSLContext context, HandshakeHandler handshakeHandler) throws Exception  {
+    public ClientConnection(String remoteAddress, int port, SSLContext context, HandshakeHandler handshakeHandler) throws Exception  {
     	this.remoteAddress = remoteAddress;
     	this.port = port;
 
@@ -38,6 +36,8 @@ public class ClientConnector extends SSLSocketLayer {
         myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
         peerAppData = ByteBuffer.allocate(1024*16);
         peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
+
+        //connect();
     }
 
 

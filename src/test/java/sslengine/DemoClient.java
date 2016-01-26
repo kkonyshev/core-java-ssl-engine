@@ -1,7 +1,7 @@
 package sslengine;
 
 import org.apache.log4j.Logger;
-import sslengine.client.ClientConnector;
+import sslengine.client.ClientConnection;
 import sslengine.handler.HandshakeHandler;
 import sslengine.utils.SSLUtils;
 
@@ -42,14 +42,14 @@ public class DemoClient {
 
     private static class ClientCommand implements Runnable {
         private static int cnt = 0;
-        private ClientConnector client;
+        private ClientConnection client;
         public ClientCommand(SSLContext context) throws Exception {
-            this.client = new ClientConnector("localhost", 9222, context, new HandshakeHandler());
+            this.client = new ClientConnection("localhost", 9222, context, new HandshakeHandler());
         }
         @Override
         public void run() {
             try {
-                client.connect();
+                //client.connect();
                 for (int j=0; j<1; j++) {
                     cnt++;
                     String toSend = "Hello! I am a client #" + cnt;
@@ -60,7 +60,7 @@ public class DemoClient {
                 e.printStackTrace();
             } finally {
                 try {
-                    client.shutdown();
+                    //client.shutdown();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -2,13 +2,16 @@ package sslengine;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
-import sslengine.client.ClientConnector;
+import sslengine.client.ClientConnection;
+import sslengine.client.ConnectionFactory;
+import sslengine.client.ConnectionFactoryImpl;
 import sslengine.handler.HandshakeHandler;
 import sslengine.server.ServerConnectionAcceptor;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
 import java.security.SecureRandom;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -19,8 +22,6 @@ public class TestEngineSimple {
 
     private static SSLContext clientContext;
     private static SSLContext serverContext;
-
-    private ServerConnectionAcceptor server;
 
     @BeforeClass
     public static void initContext() throws Exception {
@@ -43,32 +44,31 @@ public class TestEngineSimple {
     public void testMultiThread() throws Exception {
         SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9222, serverContext));
 
+        ConnectionFactory clientConnectionFactory = ConnectionFactoryImpl.createFactory("localhost", 9222, clientContext);
         Executor e = Executors.newFixedThreadPool(3);
-        for (int i=0; i<5; i++) {
+        for (int i=0; i<1; i++) {
             e.execute(new Runnable() {
                 @Override
                 public void run() {
-                    SSLClientWrapper client = null;
                     try {
-                        client = SSLClientWrapper.wrap(new ClientConnector("localhost", 9222, clientContext, new HandshakeHandler()));
-                        for (int i=0; i<4; i++) {
+                        SSLClientWrapper client = SSLClientWrapper.wrap(clientConnectionFactory);
+                        for (int i=0; i<2; i++) {
                             String req1 = UUID.randomUUID().toString();
+                            //Thread.sleep(Math.abs(new Random().nextInt(1000)));
                             String res1 = new String(client.call(req1.getBytes()));
                             LOG.debug("RES: " + res1);
                             assert req1.equals(res1);
                         }
                     } catch (Exception e1) {
-                        e1.printStackTrace();
-                    } finally {
-                        if (client!=null) {
-                            client.finalize();
-                        }
+                        LOG.error(e1.getMessage(), e1);
+                        throw new RuntimeException();
                     }
                 }
             });
         }
 
-        Thread.sleep(3000);
+        Thread.sleep(10000);
+        //Thread.currentThread().join();
 
         server.stop();
     }
