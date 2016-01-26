@@ -17,7 +17,7 @@ public class SocketProcessor extends SSLSocketLayer implements Runnable {
     private final Logger log = Logger.getLogger(getClass());
 
     private SSLEngine       sslEngine;
-    private EventHandler handler;
+    private EventHandler    handler;
     private SocketChannel   socketChannel;
     private byte[]          clientData;
 

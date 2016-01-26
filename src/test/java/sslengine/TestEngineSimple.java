@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import sslengine.client.ClientConnector;
 import sslengine.handler.HandshakeHandler;
-import sslengine.server.ServerConnectionAcceprot;
+import sslengine.server.ServerConnectionAcceptor;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -20,7 +20,7 @@ public class TestEngineSimple {
     private static SSLContext clientContext;
     private static SSLContext serverContext;
 
-    private ServerConnectionAcceprot server;
+    private ServerConnectionAcceptor server;
 
     @BeforeClass
     public static void initContext() throws Exception {
@@ -41,7 +41,7 @@ public class TestEngineSimple {
 
     @org.junit.Test
     public void testMultiThread() throws Exception {
-        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceprot("localhost", 9222, serverContext));
+        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9222, serverContext));
 
         Executor e = Executors.newFixedThreadPool(3);
         for (int i=0; i<5; i++) {

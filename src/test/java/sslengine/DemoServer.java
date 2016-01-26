@@ -1,6 +1,6 @@
 package sslengine;
 
-import sslengine.server.ServerConnectionAcceprot;
+import sslengine.server.ServerConnectionAcceptor;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -17,7 +17,7 @@ public class DemoServer {
                     new SecureRandom()
             );
 
-            ServerConnectionAcceprot server = new ServerConnectionAcceprot("localhost", 9222, context);
+            ServerConnectionAcceptor server = new ServerConnectionAcceptor("localhost", 9222, context);
             server.start();
         } catch (Exception e) {
             e.printStackTrace();

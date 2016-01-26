@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class ServerConnectionAcceprot {
+public class ServerConnectionAcceptor {
 
     private final Logger log = Logger.getLogger(getClass());
 
@@ -29,7 +29,7 @@ public class ServerConnectionAcceprot {
     private ConcurrentHashMap<SelectionKey, Object> sessionKeys = new ConcurrentHashMap<>();
     private ExecutorService acceptorService = Executors.newCachedThreadPool();
 
-    public ServerConnectionAcceprot(String hostAddress, int port, SSLContext context) throws Exception {
+    public ServerConnectionAcceptor(String hostAddress, int port, SSLContext context) throws Exception {
         this.context = context;
 
         selector = SelectorProvider.provider().openSelector();
