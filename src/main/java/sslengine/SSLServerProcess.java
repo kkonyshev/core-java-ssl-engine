@@ -1,6 +1,7 @@
 package sslengine;
 
 import org.apache.log4j.Logger;
+import sslengine.server.ServerConnectionAcceprot;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -10,11 +11,11 @@ public class SSLServerProcess {
     private Executor serverThread = Executors.newSingleThreadExecutor();
     private ServerThread command;
 
-    public static SSLServerProcess createInstance(NioSslServerThreaded server) {
+    public static SSLServerProcess createInstance(ServerConnectionAcceprot server) {
         return new SSLServerProcess(server);
     }
 
-    protected SSLServerProcess(NioSslServerThreaded server) {
+    protected SSLServerProcess(ServerConnectionAcceprot server) {
         command = new ServerThread(server);
         serverThread.execute(command);
     }
@@ -27,9 +28,9 @@ public class SSLServerProcess {
 
         protected final Logger LOG = Logger.getLogger(getClass());
 
-        private NioSslServerThreaded server;
+        private ServerConnectionAcceprot server;
 
-        public ServerThread(NioSslServerThreaded server) {
+        public ServerThread(ServerConnectionAcceprot server) {
             this.server = server;
         }
 

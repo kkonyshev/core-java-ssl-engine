@@ -1,8 +1,12 @@
 package sslengine;
 
+import org.apache.log4j.Logger;
+import sslengine.client.ClientConnector;
+import sslengine.handler.HandshakeHandler;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,16 +16,25 @@ import java.util.concurrent.Executors;
 
 public class DemoClient {
 
+    public static void createFile(String filePath, Long fileSize) {
+        try {
+            RandomAccessFile f = new RandomAccessFile(filePath, "rw");
+            f.setLength(fileSize);
+        } catch (Exception e) {
+            Logger.getLogger(DemoClient.class).error(e.getMessage(), e);
+        }
+    }
+
     public static void main(String[] argv) throws Exception {
         SSLContext context = SSLContext.getInstance("TLSv1.2");
         context.init(
-                SSLUtils.createKeyManagers("./src/main/resources/client.jks", "storepass", "keypass"),
-                SSLUtils.createTrustManagers("./src/main/resources/trustedCerts.jks", "storepass"),
+                SSLUtils.createKeyManagers("src/test/resources/client.private", "clientpw", "clientpw"),
+                SSLUtils.createTrustManagers("src/test/resources/server.public", "public"),
                 new SecureRandom()
         );
 
         ExecutorService srv = Executors.newFixedThreadPool(4);
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<1; i++) {
             srv.submit(new ClientCommand(context));
         }
         srv.shutdown();
@@ -29,9 +42,9 @@ public class DemoClient {
 
     private static class ClientCommand implements Runnable {
         private static int cnt = 0;
-        private NioSslClientThreadLocal client;
+        private ClientConnector client;
         public ClientCommand(SSLContext context) throws Exception {
-            this.client = new NioSslClientThreadLocal("localhost", 9222, context, new HandshakeHandler());
+            this.client = new ClientConnector("localhost", 9222, context, new HandshakeHandler());
         }
         @Override
         public void run() {
@@ -67,7 +80,9 @@ public class DemoClient {
         }
 
         private byte[] send(String toSend) throws Exception {
-            Path path = Paths.get("src/main/resources/upload_test.4MB");
+            String filePath = "src/main/resources/upload_test.out";
+            createFile(filePath, 1024*16L);
+            Path path = Paths.get(filePath);
             byte[] dataHuge = Files.readAllBytes(path);
 
             byte[] dataToSend = toSend.getBytes("UTF-8");

@@ -1,4 +1,4 @@
-package sslengine;
+package sslengine.handler;
 
 import org.apache.log4j.Logger;
 import sslengine.utils.SSLUtils;
@@ -57,7 +57,7 @@ public class HandshakeHandler {
         SSLEngineResult.HandshakeStatus handshakeStatus;
 
 
-        // NioSslPeer's fields myAppData and peerAppData are supposed to be large enough to hold all message data the peer
+        // SSLSocketLayer's fields myAppData and peerAppData are supposed to be large enough to hold all message data the peer
         // will send and expects to receive from the other peer respectively. Since the messages to be exchanged will usually be less
         // than 16KB long the capacity of these fields should also be smaller. Here we initialize these two local buffers
         // to be used for the handshake, while keeping client's buffers at the same size.
@@ -187,6 +187,11 @@ public class HandshakeHandler {
     }
 
     public void finalize() {
+        try {
+            super.finalize();
+        } catch (Throwable throwable) {
+            log.error(throwable.getMessage(), throwable);
+        }
         log.debug("Handshake handler finalizing work");
         executor.shutdown();
     }

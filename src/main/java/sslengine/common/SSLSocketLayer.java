@@ -1,18 +1,14 @@
-package sslengine;
+package sslengine.common;
 
 import org.apache.log4j.Logger;
+import sslengine.handler.HandshakeHandler;
 
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult;
-import javax.net.ssl.SSLEngineResult.HandshakeStatus;
-import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public abstract class NioSslPeer {
+public abstract class SSLSocketLayer {
 
 	protected final Logger log = Logger.getLogger(getClass());
 

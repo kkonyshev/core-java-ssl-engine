@@ -1,5 +1,6 @@
 package sslengine;
 
+import sslengine.server.ServerConnectionAcceprot;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -11,12 +12,12 @@ public class DemoServer {
         try {
             SSLContext context = SSLContext.getInstance("TLSv1.2");
             context.init(
-                    SSLUtils.createKeyManagers("./src/main/resources/server.jks", "storepass", "keypass"),
-                    SSLUtils.createTrustManagers("./src/main/resources/trustedCerts.jks", "storepass"),
+                    SSLUtils.createKeyManagers("src/test/resources/server.private", "serverpw", "serverpw"),
+                    SSLUtils.createTrustManagers("src/test/resources/client.public", "public"),
                     new SecureRandom()
             );
 
-            NioSslServerThreaded server = new NioSslServerThreaded("localhost", 9222, context);
+            ServerConnectionAcceprot server = new ServerConnectionAcceprot("localhost", 9222, context);
             server.start();
         } catch (Exception e) {
             e.printStackTrace();

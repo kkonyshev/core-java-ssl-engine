@@ -2,6 +2,9 @@ package sslengine;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
+import sslengine.client.ClientConnector;
+import sslengine.handler.HandshakeHandler;
+import sslengine.server.ServerConnectionAcceprot;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -17,7 +20,7 @@ public class TestEngineSimple {
     private static SSLContext clientContext;
     private static SSLContext serverContext;
 
-    private NioSslServerThreaded server;
+    private ServerConnectionAcceprot server;
 
     @BeforeClass
     public static void initContext() throws Exception {
@@ -38,7 +41,7 @@ public class TestEngineSimple {
 
     @org.junit.Test
     public void testMultiThread() throws Exception {
-        SSLServerProcess server = SSLServerProcess.createInstance(new NioSslServerThreaded("localhost", 9222, serverContext));
+        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceprot("localhost", 9222, serverContext));
 
         Executor e = Executors.newFixedThreadPool(3);
         for (int i=0; i<5; i++) {
@@ -47,7 +50,7 @@ public class TestEngineSimple {
                 public void run() {
                     SSLClientWrapper client = null;
                     try {
-                        client = SSLClientWrapper.wrap(new NioSslClientThreadLocal("localhost", 9222, clientContext, new HandshakeHandler()));
+                        client = SSLClientWrapper.wrap(new ClientConnector("localhost", 9222, clientContext, new HandshakeHandler()));
                         for (int i=0; i<4; i++) {
                             String req1 = UUID.randomUUID().toString();
                             String res1 = new String(client.call(req1.getBytes()));

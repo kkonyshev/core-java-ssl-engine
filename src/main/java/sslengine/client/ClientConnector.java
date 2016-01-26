@@ -1,5 +1,7 @@
-package sslengine;
+package sslengine.client;
 
+import sslengine.handler.HandshakeHandler;
+import sslengine.common.SSLSocketLayer;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.*;
@@ -11,7 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 
-public class NioSslClientThreadLocal extends NioSslPeer {
+public class ClientConnector extends SSLSocketLayer {
 
 	private String remoteAddress;
 
@@ -22,7 +24,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
     private SocketChannel socketChannel;
     private HandshakeHandler handshakeHandler;
 
-    public NioSslClientThreadLocal(String remoteAddress, int port, SSLContext context, HandshakeHandler handshakeHandler) throws Exception  {
+    public ClientConnector(String remoteAddress, int port, SSLContext context, HandshakeHandler handshakeHandler) throws Exception  {
     	this.remoteAddress = remoteAddress;
     	this.port = port;
 
@@ -32,9 +34,9 @@ public class NioSslClientThreadLocal extends NioSslPeer {
         engine.setUseClientMode(true);
 
         SSLSession session = engine.getSession();
-        myAppData = ByteBuffer.allocate(16384);
+        myAppData = ByteBuffer.allocate(1024*16);
         myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
-        peerAppData = ByteBuffer.allocate(16384);
+        peerAppData = ByteBuffer.allocate(1024*16);
         peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     }
 
@@ -76,7 +78,7 @@ public class NioSslClientThreadLocal extends NioSslPeer {
                 while (myNetData.hasRemaining()) {
                     socketChannel.write(myNetData);
                 }
-                log.debug("Message sent to the server, size: " + new String(data));
+                log.debug("Message sent to the server, size: " + data.length);
                 break;
             case BUFFER_OVERFLOW:
                 myNetData = SSLUtils.enlargePacketBuffer(engine, myNetData);

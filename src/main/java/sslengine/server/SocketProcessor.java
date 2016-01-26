@@ -1,6 +1,8 @@
-package sslengine;
+package sslengine.server;
 
 import org.apache.log4j.Logger;
+import sslengine.handler.EventHandler;
+import sslengine.common.SSLSocketLayer;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.*;
@@ -10,12 +12,12 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 
-public class SocketProcessor extends NioSslPeer implements Runnable {
+public class SocketProcessor extends SSLSocketLayer implements Runnable {
 
     private final Logger log = Logger.getLogger(getClass());
 
     private SSLEngine       sslEngine;
-    private EventHandler    handler;
+    private EventHandler handler;
     private SocketChannel   socketChannel;
     private byte[]          clientData;
 
@@ -51,7 +53,7 @@ public class SocketProcessor extends NioSslPeer implements Runnable {
 
     /**
      * Will be called by the selector when the specific socket channel has data to be read.
-     * As soon as the server reads these data, it will call {@link NioSslServerThreaded#write(SocketChannel, SSLEngine, byte[])}
+     * As soon as the server reads these data, it will call {@link SocketProcessor#write(SocketChannel, SSLEngine, byte[])}
      * to send back a trivial response.
      *
      * @param socketChannel - the transport link used between the two peers.
