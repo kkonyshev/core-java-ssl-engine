@@ -70,7 +70,7 @@ public class ServerConnectionAcceptor {
                 }
             }
         }
-        LOG.debug("open connection: " + selector.selectedKeys().size());
+        LOG.info("open connection: " + selector.selectedKeys().size());
         LOG.debug("Goodbye!");
     }
 
@@ -80,6 +80,7 @@ public class ServerConnectionAcceptor {
     	active = false;
         acceptorService.shutdown();
     	selector.wakeup();
+        LOG.info("open connection: " + selector.selectedKeys().size());
     }
 
     private void accept(SelectionKey key) throws Exception {
