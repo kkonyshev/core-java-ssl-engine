@@ -1,8 +1,9 @@
 package sslengine.example.map.server;
 
 import org.apache.log4j.Logger;
+import sslengine.SSLSocketChannelData;
 import sslengine.server.EventHandler;
-import sslengine.server.SocketProcessor;
+import sslengine.server.SSLSocketProcessor;
 import sslengine.server.SocketProcessorFactory;
 
 import javax.net.ssl.SSLEngine;
@@ -12,11 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MtMapServerSocketProcessorFactory implements SocketProcessorFactory {
 
-    public SocketProcessor create(SelectionKey key, ConcurrentHashMap<SelectionKey, Object> sessionKeys) throws Exception {
+    public SSLSocketProcessor create(SelectionKey key, ConcurrentHashMap<SelectionKey, Object> sessionKeys) throws Exception {
 
-        return new MtMapServerSocketProcessor(
-                (SocketChannel) key.channel(),
-                (SSLEngine) key.attachment(),
+        return new MtMapServerSSLSocketProcessor(
+                new SSLSocketChannelData((SocketChannel) key.channel(), (SSLEngine) key.attachment()),
                 new EventHandler() {
                     private final Logger LOG = Logger.getLogger(getClass());
                     @Override

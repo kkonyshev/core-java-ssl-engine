@@ -1,16 +1,11 @@
 package sslengine.server;
 
 import org.apache.log4j.Logger;
-import sslengine.HandshakeHandler;
-import sslengine.example.map.server.MtMapServerSocketProcessorFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,21 +14,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class ServerConnectionAcceptor {
+abstract public class ServerConnectionAcceptor {
 
-    private final Logger LOG = Logger.getLogger(getClass());
+    protected final Logger LOG = Logger.getLogger(getClass());
 
-    private SSLContext context;
-    private Selector selector;
-    private boolean active;
+    protected Selector selector;
+    protected boolean active;
 
-    private ConcurrentHashMap<SelectionKey, Object> sessionKeys = new ConcurrentHashMap<>();
-    private ExecutorService acceptorService = Executors.newCachedThreadPool();
+    protected ConcurrentHashMap<SelectionKey, Object> sessionKeys = new ConcurrentHashMap<>();
+    protected ExecutorService acceptorService = Executors.newCachedThreadPool();
 
-    private SocketProcessorFactory socketProcessorFactory;
+    protected SocketProcessorFactory socketProcessorFactory;
 
-    public ServerConnectionAcceptor(String hostAddress, int port, SSLContext context, SocketProcessorFactory socketProcessorFactory) throws Exception {
-        this.context = context;
+    public ServerConnectionAcceptor(String hostAddress, int port, SocketProcessorFactory socketProcessorFactory) throws Exception {
 
         selector = SelectorProvider.provider().openSelector();
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -88,24 +81,7 @@ public class ServerConnectionAcceptor {
         LOG.info("open connection: " + selector.selectedKeys().size());
     }
 
-    private void accept(SelectionKey key) throws Exception {
-        SocketChannel socketChannel = ((ServerSocketChannel) key.channel()).accept();
-        LOG.info("Receiving connection from: " + socketChannel.getRemoteAddress());
-        socketChannel.configureBlocking(false);
-
-        SSLEngine engine = context.createSSLEngine();
-        engine.setUseClientMode(false);
-        engine.beginHandshake();
-
-        if (HandshakeHandler.doHandshake(socketChannel, engine)) {
-            socketChannel.register(selector, SelectionKey.OP_READ, engine);
-        } else {
-            socketChannel.close();
-            sessionKeys.remove(key);
-            LOG.warn("Connection closed due to handshake failure.");
-        }
-    }
-
+    abstract protected void accept(SelectionKey key) throws Exception;
 
 
     private boolean isActive() {

@@ -2,12 +2,10 @@ package sslengine;
 
 import org.apache.log4j.Logger;
 
-import javax.net.ssl.SSLEngine;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 
-public abstract class SSLSocketLayer {
+public abstract class SSLSocketLayer extends AbstractSocketLayer<SSLSocketChannelData> {
 
 	protected final Logger LOG = Logger.getLogger(getClass());
 
@@ -17,44 +15,19 @@ public abstract class SSLSocketLayer {
     protected ByteBuffer peerAppData;
     protected ByteBuffer peerNetData;
 
-    protected abstract byte[] read(SocketChannel socketChannel, SSLEngine engine) throws Exception;
-    protected abstract void write(SocketChannel socketChannel, SSLEngine engine, byte[] data) throws Exception;
-
-    /**
-     * This method should be called when this peer wants to explicitly close the connection
-     * or when a close message has arrived from the other peer, in order to provide an orderly shutdown.
-     * <p/>
-     * It first calls {@link SSLEngine#closeOutbound()} which prepares this peer to send its own close message and
-     * sets {@link SSLEngine} to the <code>NEED_WRAP</code> state. Then, it delegates the exchange of close messages
-     * to the handshake method and finally, it closes socket channel.
-     *
-     * @param socketChannel - the transport link used between the two peers.
-     * @param engine - the engine used for encryption/decryption of the data exchanged between the two peers.
-     * @throws IOException if an I/O error occurs to the socket channel.
-     */
-    protected void closeConnection(SocketChannel socketChannel, SSLEngine engine) throws IOException  {
-        engine.closeOutbound();
-        HandshakeHandler.doHandshake(socketChannel, engine);
-        LOG.info("Closing connection: " + socketChannel.getRemoteAddress());
-        socketChannel.close();
+    protected void closeConnection(SSLSocketChannelData sslSocketChannelData) throws IOException  {
+        sslSocketChannelData.socketSSLEngine.closeOutbound();
+        HandshakeHandler.doHandshake(sslSocketChannelData.socketChannel, sslSocketChannelData.socketSSLEngine);
+        LOG.info("Closing connection: " + sslSocketChannelData.socketChannel.getRemoteAddress());
+        sslSocketChannelData.socketChannel.close();
     }
 
-    /**
-     * In addition to orderly shutdowns, an unorderly shutdown may occur, when the transport link (socket channel)
-     * is severed before close messages are exchanged. This may happen by getting an -1 or {@link IOException}
-     * when trying to read from the socket channel, or an {@link IOException} when trying to write to it.
-     * In both cases {@link SSLEngine#closeInbound()} should be called and then try to follow the standard procedure.
-     *
-     * @param socketChannel - the transport link used between the two peers.
-     * @param engine - the engine used for encryption/decryption of the data exchanged between the two peers.
-     * @throws IOException if an I/O error occurs to the socket channel.
-     */
-    protected void handleEndOfStream(SocketChannel socketChannel, SSLEngine engine) throws IOException  {
+    protected void handleEndOfStream(SSLSocketChannelData sslSocketChannelData) throws IOException  {
         try {
-            engine.closeInbound();
+            sslSocketChannelData.socketSSLEngine.closeInbound();
         } catch (Exception e) {
             LOG.error("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
         }
-        closeConnection(socketChannel, engine);
+        closeConnection(sslSocketChannelData);
     }
 }

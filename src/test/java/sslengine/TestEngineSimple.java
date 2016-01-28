@@ -2,13 +2,15 @@ package sslengine;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
-import sslengine.client.*;
+import sslengine.client.AbstractSSLClient;
+import sslengine.client.ClientConnectionFactory;
+import sslengine.client.SSLClientConnectionFactory;
+import sslengine.example.simpleobject.client.SimpleClientHandler;
+import sslengine.example.simpleobject.client.SimpleSSLClientImpl;
 import sslengine.example.simpleobject.dto.SimpleRequestDto;
 import sslengine.example.simpleobject.dto.SimpleResponseDto;
 import sslengine.example.simpleobject.server.SimpleSocketProcessorFactory;
-import sslengine.server.ServerConnectionAcceptor;
-import sslengine.example.simpleobject.client.SimpleClientHandler;
-import sslengine.example.simpleobject.client.SimpleSSLClientImpl;
+import sslengine.server.SSLServerConnectionAcceptor;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -46,9 +48,9 @@ public class TestEngineSimple {
 
     @org.junit.Test
     public void testMultiThread() throws Exception {
-        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9222, serverContext, new SimpleSocketProcessorFactory()));
+        ServerProcess server = ServerProcess.createInstance(new SSLServerConnectionAcceptor("localhost", 9222, new SimpleSocketProcessorFactory(), serverContext));
 
-        ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9222, clientContext);
+        ClientConnectionFactory clientConnectionFactory = SSLClientConnectionFactory.buildFactory("localhost", 9222, clientContext);
         Executor e = Executors.newFixedThreadPool(3);
         for (int i=0; i<4; i++) {
             e.execute(() -> {

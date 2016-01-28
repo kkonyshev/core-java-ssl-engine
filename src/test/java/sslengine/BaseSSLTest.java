@@ -7,7 +7,7 @@ import sslengine.utils.SSLUtils;
 import javax.net.ssl.SSLContext;
 import java.security.SecureRandom;
 
-public class BaseSSLTest {
+abstract public class BaseSSLTest {
 
     protected final Logger LOG = Logger.getLogger(getClass());
 

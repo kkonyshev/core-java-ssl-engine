@@ -1,14 +1,14 @@
 package sslengine;
 
 import sslengine.client.ClientConnectionFactory;
-import sslengine.client.ClientConnectionFactoryImpl;
+import sslengine.client.SSLClientConnectionFactory;
 import sslengine.example.map.client.MtMapClientHandler;
 import sslengine.example.map.client.MtMapSSLClientImpl;
 import sslengine.example.map.dto.MtTransferReq;
 import sslengine.example.map.dto.MtTransferRes;
 import sslengine.example.map.dto.TransferEvent;
 import sslengine.example.map.server.MtMapServerSocketProcessorFactory;
-import sslengine.server.ServerConnectionAcceptor;
+import sslengine.server.SSLServerConnectionAcceptor;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,9 +19,9 @@ public class TestTransferMapMT extends BaseSSLTest {
 
     @org.junit.Test
     public void testMultiThread() throws Exception {
-        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9223, serverContext, new MtMapServerSocketProcessorFactory()));
+        ServerProcess server = ServerProcess.createInstance(new SSLServerConnectionAcceptor("localhost", 9223, new MtMapServerSocketProcessorFactory(), serverContext));
 
-        ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9223, clientContext);
+        ClientConnectionFactory clientConnectionFactory = SSLClientConnectionFactory.buildFactory("localhost", 9223, clientContext);
         Executor executor = Executors.newFixedThreadPool(3);
 
         String processId = UUID.randomUUID().toString();
