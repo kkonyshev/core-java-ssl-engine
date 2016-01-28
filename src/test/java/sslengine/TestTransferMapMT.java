@@ -1,14 +1,14 @@
 package sslengine;
 
 import sslengine.client.ClientConnectionFactory;
-import sslengine.client.ClientConnectionFactoryImpl;
+import sslengine.client.SSLClientConnectionFactory;
 import sslengine.example.map.client.MtMapClientHandler;
-import sslengine.example.map.client.MtMapSSLClientImpl;
+import sslengine.example.map.client.MtMapClientImpl;
 import sslengine.example.map.dto.MtTransferReq;
 import sslengine.example.map.dto.MtTransferRes;
 import sslengine.example.map.dto.TransferEvent;
 import sslengine.example.map.server.MtMapServerSocketProcessorFactory;
-import sslengine.server.ServerConnectionAcceptor;
+import sslengine.server.SSLServerConnectionAcceptor;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,14 +19,14 @@ public class TestTransferMapMT extends BaseSSLTest {
 
     @org.junit.Test
     public void testMultiThread() throws Exception {
-        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9223, serverContext, new MtMapServerSocketProcessorFactory()));
+        ServerProcess server = ServerProcess.createInstance(new SSLServerConnectionAcceptor("localhost", 9223, new MtMapServerSocketProcessorFactory(), serverContext));
 
-        ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9223, clientContext);
+        ClientConnectionFactory clientConnectionFactory = SSLClientConnectionFactory.buildFactory("localhost", 9223, clientContext);
         Executor executor = Executors.newFixedThreadPool(3);
 
         String processId = UUID.randomUUID().toString();
 
-        MtMapSSLClientImpl initClient = new MtMapSSLClientImpl(clientConnectionFactory, new MtMapClientHandler());
+        MtMapClientImpl initClient = new MtMapClientImpl(clientConnectionFactory, new MtMapClientHandler());
         initClient.start(processId);
 
         Map<Object, Object> sourceMap = new HashMap<>();
@@ -46,9 +46,9 @@ public class TestTransferMapMT extends BaseSSLTest {
         for (Map.Entry<Integer, List<Map<Object, Object>>> thE: threadMap.entrySet()) {
             executor.execute(() -> {
                 LOG.debug("started thread="+thE.getKey());
-                MtMapSSLClientImpl threadClient = null;
+                MtMapClientImpl threadClient = null;
                 try {
-                    threadClient = new MtMapSSLClientImpl(clientConnectionFactory, new MtMapClientHandler());
+                    threadClient = new MtMapClientImpl(clientConnectionFactory, new MtMapClientHandler());
                     for(Map<Object, Object> mm: thE.getValue()) {
                         MtTransferReq requestDto = new MtTransferReq(processId, TransferEvent.PROCESS, mm);
                         LOG.debug("REQ: " + requestDto);

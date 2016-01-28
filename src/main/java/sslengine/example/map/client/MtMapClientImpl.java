@@ -1,24 +1,21 @@
 package sslengine.example.map.client;
 
-import sslengine.client.AbstractSSLClient;
-import sslengine.client.ClientConnection;
-import sslengine.client.ClientConnectionFactory;
-import sslengine.client.ClientHandler;
+import sslengine.client.*;
 import sslengine.example.map.dto.MtTransferReq;
 import sslengine.example.map.dto.MtTransferRes;
 import sslengine.example.map.dto.TransferEvent;
 
 import java.io.IOException;
 
-public class MtMapSSLClientImpl extends AbstractSSLClient<MtTransferReq, MtTransferRes> {
+public class MtMapClientImpl extends AbstractClient<MtTransferReq, MtTransferRes> {
 
-    private ClientConnection sslClientConnection;
+    private ClientConnection clientConnection;
 
-    public MtMapSSLClientImpl(ClientConnectionFactory connectionFactory, ClientHandler<MtTransferReq, MtTransferRes> clientHandler) throws Exception {
+    public MtMapClientImpl(ClientConnectionFactory connectionFactory, ClientHandler<MtTransferReq, MtTransferRes> clientHandler) throws Exception {
         super(connectionFactory, clientHandler);
         LOG.info("calling to server");
-        sslClientConnection = connectionFactory.getConnection();
-        sslClientConnection.connect();
+        clientConnection = connectionFactory.getConnection();
+        clientConnection.connect();
     }
 
     public void start(String processId) throws Exception {
@@ -30,9 +27,9 @@ public class MtMapSSLClientImpl extends AbstractSSLClient<MtTransferReq, MtTrans
     @Override
     public MtTransferRes call(MtTransferReq requestDto) throws Exception {
         byte[] bytesToSend = clientHandler.encodeReq(requestDto);
-        sslClientConnection.write(bytesToSend);
+        clientConnection.write(bytesToSend);
         LOG.debug("reading from server");
-        byte[] receivedBytes = sslClientConnection.read();
+        byte[] receivedBytes = clientConnection.read();
         return clientHandler.decodeRes(receivedBytes);
     }
 
@@ -43,8 +40,8 @@ public class MtMapSSLClientImpl extends AbstractSSLClient<MtTransferReq, MtTrans
     }
 
     public void shutdown() throws IOException {
-        if (sslClientConnection != null) {
-            sslClientConnection.shutdown();
+        if (clientConnection != null) {
+            clientConnection.close();
         }
     }
 

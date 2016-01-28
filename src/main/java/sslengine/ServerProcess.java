@@ -6,16 +6,16 @@ import sslengine.server.ServerConnectionAcceptor;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class SSLServerProcess {
+public class ServerProcess {
 
     private Executor serverThread = Executors.newSingleThreadExecutor();
     private ServerThread command;
 
-    public static SSLServerProcess createInstance(ServerConnectionAcceptor server) {
-        return new SSLServerProcess(server);
+    public static ServerProcess createInstance(ServerConnectionAcceptor server) {
+        return new ServerProcess(server);
     }
 
-    protected SSLServerProcess(ServerConnectionAcceptor server) {
+    protected ServerProcess(ServerConnectionAcceptor server) {
         command = new ServerThread(server);
         serverThread.execute(command);
     }

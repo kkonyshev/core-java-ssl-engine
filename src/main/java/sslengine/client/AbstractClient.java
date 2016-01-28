@@ -4,14 +4,14 @@ import org.apache.log4j.Logger;
 import sslengine.client.ClientConnectionFactory;
 import sslengine.client.ClientHandler;
 
-public abstract class AbstractSSLClient<RequestDto, ResponseDto> {
+public abstract class AbstractClient<RequestDto, ResponseDto> {
 
     protected final Logger LOG = Logger.getLogger(getClass());
 
     protected ClientConnectionFactory connectionFactory;
     protected ClientHandler<RequestDto, ResponseDto> clientHandler;
 
-    protected AbstractSSLClient(ClientConnectionFactory connectionFactory, ClientHandler<RequestDto, ResponseDto> clientHandler) throws Exception {
+    protected AbstractClient(ClientConnectionFactory connectionFactory, ClientHandler<RequestDto, ResponseDto> clientHandler) throws Exception {
         this.connectionFactory = connectionFactory;
         this.clientHandler = clientHandler;
     }

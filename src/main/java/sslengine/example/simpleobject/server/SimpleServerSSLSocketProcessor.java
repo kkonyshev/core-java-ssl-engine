@@ -1,22 +1,21 @@
 package sslengine.example.simpleobject.server;
 
-import sslengine.server.SocketProcessor;
+import sslengine.SSLSocketChannelData;
 import sslengine.example.simpleobject.dto.SimpleRequestDto;
 import sslengine.example.simpleobject.dto.SimpleResponseDto;
 import sslengine.server.EventHandler;
+import sslengine.server.SSLSocketProcessor;
 
-import javax.net.ssl.SSLEngine;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 
-public class SimpleServerSocketProcessor extends SocketProcessor {
+public class SimpleServerSSLSocketProcessor extends SSLSocketProcessor {
 
     private SimpleServerHandler simpleServerHandler;
     private SimpleServerRequestProcessor simpleServerRequestProcessor;
 
-    public SimpleServerSocketProcessor(SocketChannel socketChannel, SSLEngine sslEngine, EventHandler handler) throws FileNotFoundException {
-        super(socketChannel, sslEngine, handler);
+    public SimpleServerSSLSocketProcessor(SSLSocketChannelData sslSocketChannelData, EventHandler handler) throws FileNotFoundException {
+        super(sslSocketChannelData, handler);
         this.simpleServerHandler = new SimpleServerHandler();
         this.simpleServerRequestProcessor = new SimpleServerRequestProcessor();
     }
