@@ -1,7 +1,6 @@
-package sslengine.server.impl;
+package sslengine.server;
 
-import sslengine.common.EventHandler;
-import sslengine.common.SSLSocketLayer;
+import sslengine.SSLSocketLayer;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLEngine;
@@ -15,7 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 
-abstract class SocketProcessor extends SSLSocketLayer implements Runnable {
+public abstract class SocketProcessor extends SSLSocketLayer implements Runnable {
 
     private SSLEngine sslEngine;
     private EventHandler handler;
@@ -47,7 +46,7 @@ abstract class SocketProcessor extends SSLSocketLayer implements Runnable {
         }
     }
 
-    abstract byte[] processRequest(byte[] clientData) throws IOException;
+    public abstract byte[] processRequest(byte[] clientData) throws IOException;
 
     /**
      * Will be called by the selector when the specific socket channel has data to be read.

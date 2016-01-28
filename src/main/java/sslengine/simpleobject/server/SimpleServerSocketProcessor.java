@@ -1,8 +1,9 @@
-package sslengine.server.impl;
+package sslengine.simpleobject.server;
 
-import sslengine.dto.SimpleRequestDto;
-import sslengine.dto.SimpleResponseDto;
-import sslengine.common.EventHandler;
+import sslengine.server.SocketProcessor;
+import sslengine.simpleobject.dto.SimpleRequestDto;
+import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.server.EventHandler;
 
 import javax.net.ssl.SSLEngine;
 import java.io.FileNotFoundException;
@@ -21,7 +22,7 @@ public class SimpleServerSocketProcessor extends SocketProcessor {
     }
 
     @Override
-    byte[] processRequest(byte[] clientData) throws IOException {
+    public byte[] processRequest(byte[] clientData) throws IOException {
         //echo
         //write(socketChannel, sslEngine, clientData);
         byte[] localClientData = clientData;

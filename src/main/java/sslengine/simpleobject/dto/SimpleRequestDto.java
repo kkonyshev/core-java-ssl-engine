@@ -1,4 +1,4 @@
-package sslengine.dto;
+package sslengine.simpleobject.dto;
 
 import java.io.Serializable;
 import java.util.Date;

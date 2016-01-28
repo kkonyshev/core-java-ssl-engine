@@ -1,17 +1,17 @@
-package sslengine.client.impl;
+package sslengine.client;
 
 import org.apache.log4j.Logger;
 import sslengine.client.ClientConnectionFactory;
 import sslengine.client.ClientHandler;
 
-public abstract class SSLClient<RequestDto, ResponseDto> {
+public abstract class AbstractSSLClient<RequestDto, ResponseDto> {
 
     protected final Logger LOG = Logger.getLogger(getClass());
 
     protected ClientConnectionFactory connectionFactory;
     protected ClientHandler<RequestDto, ResponseDto> clientHandler;
 
-    protected SSLClient(ClientConnectionFactory connectionFactory, ClientHandler<RequestDto, ResponseDto> clientHandler) throws Exception {
+    protected AbstractSSLClient(ClientConnectionFactory connectionFactory, ClientHandler<RequestDto, ResponseDto> clientHandler) throws Exception {
         this.connectionFactory = connectionFactory;
         this.clientHandler = clientHandler;
     }

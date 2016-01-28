@@ -1,6 +1,4 @@
-package sslengine.client.impl;
-
-import sslengine.client.ClientConnectionFactory;
+package sslengine.client;
 
 import javax.net.ssl.SSLContext;
 

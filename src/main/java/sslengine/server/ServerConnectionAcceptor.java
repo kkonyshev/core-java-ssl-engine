@@ -1,7 +1,8 @@
-package sslengine.server.impl;
+package sslengine.server;
 
 import org.apache.log4j.Logger;
-import sslengine.common.HandshakeHandler;
+import sslengine.HandshakeHandler;
+import sslengine.simpleobject.server.ServerSocketProcessorFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;

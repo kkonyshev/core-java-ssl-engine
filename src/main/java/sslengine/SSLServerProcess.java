@@ -1,7 +1,7 @@
 package sslengine;
 
 import org.apache.log4j.Logger;
-import sslengine.server.impl.ServerConnectionAcceptor;
+import sslengine.server.ServerConnectionAcceptor;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

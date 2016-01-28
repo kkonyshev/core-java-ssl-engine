@@ -1,7 +1,7 @@
-package sslengine.client.impl;
+package sslengine.client;
 
-import sslengine.common.HandshakeHandler;
-import sslengine.common.SSLSocketLayer;
+import sslengine.HandshakeHandler;
+import sslengine.SSLSocketLayer;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.*;

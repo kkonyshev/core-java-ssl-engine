@@ -1,7 +1,7 @@
-package sslengine.server.impl;
+package sslengine.simpleobject.server;
 
 import org.apache.log4j.Logger;
-import sslengine.common.EventHandler;
+import sslengine.server.EventHandler;
 
 import javax.net.ssl.SSLEngine;
 import java.io.FileNotFoundException;
