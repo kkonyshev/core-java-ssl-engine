@@ -1,8 +1,8 @@
-package sslengine.simpleobject.server;
+package sslengine.example.simpleobject.server;
 
 import sslengine.server.SocketProcessor;
-import sslengine.simpleobject.dto.SimpleRequestDto;
-import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.dto.SimpleRequestDto;
+import sslengine.example.simpleobject.dto.SimpleResponseDto;
 import sslengine.server.EventHandler;
 
 import javax.net.ssl.SSLEngine;

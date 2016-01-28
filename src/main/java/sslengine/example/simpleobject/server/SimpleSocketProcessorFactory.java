@@ -1,18 +1,19 @@
-package sslengine.simpleobject.server;
+package sslengine.example.simpleobject.server;
 
 import org.apache.log4j.Logger;
 import sslengine.server.EventHandler;
+import sslengine.server.SocketProcessor;
+import sslengine.server.SocketProcessorFactory;
 
 import javax.net.ssl.SSLEngine;
-import java.io.FileNotFoundException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerSocketProcessorFactory {
+public class SimpleSocketProcessorFactory implements SocketProcessorFactory {
 
-    public static SimpleServerSocketProcessor create(SelectionKey key, ConcurrentHashMap<SelectionKey, Object> sessionKeys) throws FileNotFoundException {
-
+    @Override
+    public SocketProcessor create(SelectionKey key, ConcurrentHashMap<SelectionKey, Object> sessionKeys) throws Exception {
         return new SimpleServerSocketProcessor(
                 (SocketChannel) key.channel(),
                 (SSLEngine) key.attachment(),

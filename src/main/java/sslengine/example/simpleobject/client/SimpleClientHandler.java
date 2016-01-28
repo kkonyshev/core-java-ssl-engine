@@ -1,8 +1,8 @@
-package sslengine.simpleobject.client;
+package sslengine.example.simpleobject.client;
 
 import sslengine.client.ClientHandler;
-import sslengine.simpleobject.dto.SimpleRequestDto;
-import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.dto.SimpleRequestDto;
+import sslengine.example.simpleobject.dto.SimpleResponseDto;
 import sslengine.utils.EncodeUtils;
 
 public class SimpleClientHandler implements ClientHandler<SimpleRequestDto, SimpleResponseDto> {

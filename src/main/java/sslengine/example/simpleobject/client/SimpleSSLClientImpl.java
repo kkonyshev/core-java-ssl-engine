@@ -1,15 +1,15 @@
-package sslengine.simpleobject.client;
+package sslengine.example.simpleobject.client;
 
 import sslengine.client.ClientConnectionFactory;
 import sslengine.client.ClientHandler;
 import sslengine.client.AbstractSSLClient;
 import sslengine.client.ClientConnection;
-import sslengine.simpleobject.dto.SimpleRequestDto;
-import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.dto.SimpleRequestDto;
+import sslengine.example.simpleobject.dto.SimpleResponseDto;
 
-public class SimpleAbstractSSLClientImpl extends AbstractSSLClient<SimpleRequestDto, SimpleResponseDto> {
+public class SimpleSSLClientImpl extends AbstractSSLClient<SimpleRequestDto, SimpleResponseDto> {
 
-    public SimpleAbstractSSLClientImpl(ClientConnectionFactory connectionFactory, ClientHandler<SimpleRequestDto, SimpleResponseDto> clientHandler) throws Exception {
+    public SimpleSSLClientImpl(ClientConnectionFactory connectionFactory, ClientHandler<SimpleRequestDto, SimpleResponseDto> clientHandler) throws Exception {
         super(connectionFactory, clientHandler);
     }
 

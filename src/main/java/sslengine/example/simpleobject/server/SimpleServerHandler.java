@@ -1,7 +1,7 @@
-package sslengine.simpleobject.server;
+package sslengine.example.simpleobject.server;
 
-import sslengine.simpleobject.dto.SimpleRequestDto;
-import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.dto.SimpleRequestDto;
+import sslengine.example.simpleobject.dto.SimpleResponseDto;
 import sslengine.server.ServerHandler;
 import sslengine.utils.EncodeUtils;
 

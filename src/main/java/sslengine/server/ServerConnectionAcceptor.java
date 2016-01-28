@@ -2,7 +2,7 @@ package sslengine.server;
 
 import org.apache.log4j.Logger;
 import sslengine.HandshakeHandler;
-import sslengine.simpleobject.server.ServerSocketProcessorFactory;
+import sslengine.example.map.server.MtMapServerSocketProcessorFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -30,7 +30,9 @@ public class ServerConnectionAcceptor {
     private ConcurrentHashMap<SelectionKey, Object> sessionKeys = new ConcurrentHashMap<>();
     private ExecutorService acceptorService = Executors.newCachedThreadPool();
 
-    public ServerConnectionAcceptor(String hostAddress, int port, SSLContext context) throws Exception {
+    private SocketProcessorFactory socketProcessorFactory;
+
+    public ServerConnectionAcceptor(String hostAddress, int port, SSLContext context, SocketProcessorFactory socketProcessorFactory) throws Exception {
         this.context = context;
 
         selector = SelectorProvider.provider().openSelector();
@@ -38,6 +40,8 @@ public class ServerConnectionAcceptor {
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.socket().bind(new InetSocketAddress(hostAddress, port));
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+        this.socketProcessorFactory = socketProcessorFactory;
 
         active = true;
     }
@@ -67,7 +71,7 @@ public class ServerConnectionAcceptor {
                 } else if (key.isReadable()) {
                     LOG.trace("processing new socket channel: " + key.channel());
                     sessionKeys.put(key, new Object());
-                    acceptorService.submit(ServerSocketProcessorFactory.create(key, sessionKeys));
+                    acceptorService.submit(socketProcessorFactory.create(key, sessionKeys));
                 }
             }
         }

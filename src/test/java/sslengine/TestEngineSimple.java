@@ -3,11 +3,12 @@ package sslengine;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import sslengine.client.*;
-import sslengine.simpleobject.dto.SimpleRequestDto;
-import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.dto.SimpleRequestDto;
+import sslengine.example.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.server.SimpleSocketProcessorFactory;
 import sslengine.server.ServerConnectionAcceptor;
-import sslengine.simpleobject.client.SimpleClientHandler;
-import sslengine.simpleobject.client.SimpleAbstractSSLClientImpl;
+import sslengine.example.simpleobject.client.SimpleClientHandler;
+import sslengine.example.simpleobject.client.SimpleSSLClientImpl;
 import sslengine.utils.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -45,15 +46,15 @@ public class TestEngineSimple {
 
     @org.junit.Test
     public void testMultiThread() throws Exception {
-        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9222, serverContext));
+        SSLServerProcess server = SSLServerProcess.createInstance(new ServerConnectionAcceptor("localhost", 9222, serverContext, new SimpleSocketProcessorFactory()));
 
         ClientConnectionFactory clientConnectionFactory = ClientConnectionFactoryImpl.buildFactory("localhost", 9222, clientContext);
         Executor e = Executors.newFixedThreadPool(3);
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<4; i++) {
             e.execute(() -> {
                     try {
-                        AbstractSSLClient<SimpleRequestDto, SimpleResponseDto> client = new SimpleAbstractSSLClientImpl(clientConnectionFactory, new SimpleClientHandler());
-                        for (int j=0; j<10; j++) {
+                        AbstractSSLClient<SimpleRequestDto, SimpleResponseDto> client = new SimpleSSLClientImpl(clientConnectionFactory, new SimpleClientHandler());
+                        for (int j=0; j<3; j++) {
                             SimpleRequestDto requestDto = new SimpleRequestDto(new Date());
                             LOG.debug("REQ: " + requestDto);
                             SimpleResponseDto responseDto = client.call(requestDto);

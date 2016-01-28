@@ -1,7 +1,7 @@
-package sslengine.simpleobject.server;
+package sslengine.example.simpleobject.server;
 
-import sslengine.simpleobject.dto.SimpleRequestDto;
-import sslengine.simpleobject.dto.SimpleResponseDto;
+import sslengine.example.simpleobject.dto.SimpleRequestDto;
+import sslengine.example.simpleobject.dto.SimpleResponseDto;
 import sslengine.server.ServerRequestProcessor;
 
 import java.util.Date;
@@ -12,4 +12,5 @@ public class SimpleServerRequestProcessor implements ServerRequestProcessor<Simp
     public SimpleResponseDto process(SimpleRequestDto simpleRequestDto) {
         return new SimpleResponseDto(simpleRequestDto, new Date());
     }
+
 }
