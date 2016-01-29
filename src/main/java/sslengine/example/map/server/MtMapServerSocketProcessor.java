@@ -1,22 +1,21 @@
 package sslengine.example.map.server;
 
-import sslengine.SSLSocketChannelData;
+import sslengine.AbstractSocketLayer;
 import sslengine.example.map.dto.MtTransferReq;
 import sslengine.example.map.dto.MtTransferRes;
 import sslengine.server.EventHandler;
-import sslengine.server.SSLSocketProcessor;
+import sslengine.server.ServerSocketProcessor;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class MtMapServerSSLSocketProcessor extends SSLSocketProcessor {
+public class MtMapServerSocketProcessor<SocketData>  extends ServerSocketProcessor {
 
     private static ServerMapRequestProcessor mapRequestProcessor = new ServerMapRequestProcessor();
 
     private MtMapServerHandler mtMapServerHandler;
 
-    public MtMapServerSSLSocketProcessor(SSLSocketChannelData sslSocketChannelData, EventHandler handler) throws FileNotFoundException {
-        super(sslSocketChannelData, handler);
+    public MtMapServerSocketProcessor(AbstractSocketLayer<SocketData> socketLayer, EventHandler handler) {
+        super(socketLayer, handler);
         this.mtMapServerHandler = new MtMapServerHandler();
     }
 

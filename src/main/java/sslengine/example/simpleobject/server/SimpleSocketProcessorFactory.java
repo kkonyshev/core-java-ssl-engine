@@ -2,8 +2,9 @@ package sslengine.example.simpleobject.server;
 
 import org.apache.log4j.Logger;
 import sslengine.SSLSocketChannelData;
+import sslengine.SSLSocketLayer;
 import sslengine.server.EventHandler;
-import sslengine.server.SSLSocketProcessor;
+import sslengine.server.ServerSocketProcessor;
 import sslengine.server.SocketProcessorFactory;
 
 import javax.net.ssl.SSLEngine;
@@ -14,10 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SimpleSocketProcessorFactory implements SocketProcessorFactory {
 
     @Override
-    public SSLSocketProcessor create(SelectionKey key, ConcurrentHashMap<SelectionKey, Object> sessionKeys) throws Exception {
+    public ServerSocketProcessor create(SelectionKey key, ConcurrentHashMap<SelectionKey, Object> sessionKeys) throws Exception {
 
-        return new SimpleServerSSLSocketProcessor(
-                new SSLSocketChannelData((SocketChannel) key.channel(), (SSLEngine) key.attachment()),
+        return new SimpleServerSocketProcessor<SSLSocketChannelData>(
+                new SSLSocketLayer(new SSLSocketChannelData((SocketChannel) key.channel(), (SSLEngine) key.attachment())),
                 new EventHandler() {
                     private final Logger LOG = Logger.getLogger(getClass());
                     @Override

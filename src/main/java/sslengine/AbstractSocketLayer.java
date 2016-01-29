@@ -8,9 +8,15 @@ public abstract class AbstractSocketLayer<SocketData> {
 
 	protected final Logger LOG = Logger.getLogger(getClass());
 
-    protected abstract byte[] read(SocketData socketData) throws Exception;
-    protected abstract void write(SocketData socketData, byte[] data) throws Exception;
+    protected SocketData socketChannelData;
+
+    public abstract byte[] read(SocketData socketData) throws Exception;
+    public abstract void write(SocketData socketData, byte[] data) throws Exception;
 
     protected abstract void closeConnection(SocketData socketData) throws IOException;
     protected abstract void handleEndOfStream(SocketData socketData) throws IOException;
+
+    public SocketData getSocketChannelData() {
+        return this.socketChannelData;
+    }
 }

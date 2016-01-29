@@ -61,7 +61,7 @@ public class SSLClientConnection extends SSLSocketLayer implements ClientConnect
 
 
     @Override
-    protected void write(SSLSocketChannelData sslSocketChannelData, byte[] data) throws IOException {
+    public void write(SSLSocketChannelData sslSocketChannelData, byte[] data) throws IOException {
         LOG.debug("Client writing to the server...");
         myAppData.clear();
         myAppData.put(data);
@@ -100,7 +100,7 @@ public class SSLClientConnection extends SSLSocketLayer implements ClientConnect
 
 
     @Override
-    protected byte[] read(SSLSocketChannelData sslSocketChannelData) throws Exception  {
+    public byte[] read(SSLSocketChannelData sslSocketChannelData) throws IOException, InterruptedException {
         LOG.debug("Client reading from the server...");
 
         byte[] data = new byte[0];
